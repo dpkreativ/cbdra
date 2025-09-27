@@ -13,16 +13,14 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <main className="grid md:grid-cols-2 gap-5 place-items-center">
-          <div className="w-full max-w-md mx-auto p-5">
-            <Image src={illustration} alt="CBDRA" />
-          </div>
+    <body>
+      <main className="grid md:grid-cols-2 gap-5 place-items-center">
+        <div className="w-full max-w-md mx-auto p-5">
+          <Image src={illustration} alt="CBDRA" />
+        </div>
 
-          {children}
-        </main>
-      </body>
-    </html>
+        {children}
+      </main>
+    </body>
   );
 }

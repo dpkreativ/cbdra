@@ -1,4 +1,4 @@
-import { Client, Databases, Account, Users } from "node-appwrite";
+import { Client, Databases, Account, Users, Storage } from "node-appwrite";
 import { requiredEnv } from "@/lib/utils";
 
 /**
@@ -16,6 +16,7 @@ export async function createAdminClient() {
     account: new Account(client),
     databases: new Databases(client),
     users: new Users(client),
+    storage: new Storage(client),
   };
 }
 
@@ -34,5 +35,6 @@ export async function createSessionClient(sessionId: string) {
     account: new Account(client),
     databases: new Databases(client),
     users: new Users(client),
+    storage: new Storage(client),
   };
 }
