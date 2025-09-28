@@ -21,7 +21,7 @@ export const incidentCreateSchema = z.object({
   urgency: z.enum(["low", "medium", "high"]),
   lat: z.number(),
   lng: z.number(),
-  media: z.array(z.instanceof(File)).max(5),
+  media: z.array(z.instanceof(File)).max(5).optional(),
 });
 
 export type IncidentData = z.infer<typeof incidentDataSchema>;

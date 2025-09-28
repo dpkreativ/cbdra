@@ -304,7 +304,8 @@ export default function GetHelpPage() {
         e instanceof Error
           ? e.message
           : "Something went wrong while submitting your incident.";
-      alert(message);
+      // alert(message);
+      console.error(message);
     } finally {
       setIsUploading(false);
       setProgress(0);
