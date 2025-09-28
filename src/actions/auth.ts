@@ -52,7 +52,7 @@ export async function signup(options: AuthOptions, formData: FormData) {
   const user = await users.create(
     ID.unique(),
     email,
-    "",
+    undefined,
     password,
     name || undefined
   );
