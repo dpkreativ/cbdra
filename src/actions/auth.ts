@@ -5,11 +5,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ID } from "node-appwrite";
 
+interface AuthOptions {
+  redirectTo?: string;
+}
+
 /**
  * Login with email/password.
  * Creates a user session, stores it in a secure cookie, and redirects to /dashboard.
  */
-export async function login(formData: FormData) {
+export async function login(options: AuthOptions, formData: FormData) {
   const email = formData.get("email") ? String(formData.get("email")) : "";
   const password = formData.get("password")
     ? String(formData.get("password"))
@@ -27,14 +31,14 @@ export async function login(formData: FormData) {
     path: "/",
   });
 
-  redirect("/dashboard");
+  redirect(options.redirectTo || "/dashboard");
 }
 
 /**
  * Signup with name, email, password, and role.
  * Creates a new user, sets their role in preferences, creates a session, sets cookie, and redirects.
  */
-export async function signup(formData: FormData) {
+export async function signup(options: AuthOptions, formData: FormData) {
   const name = formData.get("name") ? String(formData.get("name")) : "";
   const email = formData.get("email") ? String(formData.get("email")) : "";
   const password = formData.get("password")
@@ -48,7 +52,7 @@ export async function signup(formData: FormData) {
   const user = await users.create(
     ID.unique(),
     email,
-    undefined,
+    "",
     password,
     name || undefined
   );
@@ -69,7 +73,7 @@ export async function signup(formData: FormData) {
     path: "/",
   });
 
-  redirect("/dashboard");
+  redirect(options.redirectTo || "/dashboard");
 }
 
 /**
@@ -77,17 +81,12 @@ export async function signup(formData: FormData) {
  */
 export async function signout() {
   const cookieStore = await cookies();
-  const session = cookieStore.get("session")?.value;
+  const session = cookieStore.get("session");
+  if (!session?.value) return;
 
-  if (session) {
-    try {
-      const { account } = await createSessionClient(session);
-      await account.deleteSession("current");
-    } catch {
-      // no-op
-    }
-  }
+  const { account } = await createSessionClient(session.value);
 
+  await account.deleteSession("current");
   cookieStore.delete("session");
   redirect("/login");
 }
@@ -97,17 +96,17 @@ export async function signout() {
  */
 export async function getUser() {
   const cookieStore = await cookies();
-  const session = cookieStore.get("session")?.value;
+  const session = cookieStore.get("session");
 
-  if (session) {
-    try {
-      const { account } = await createSessionClient(session);
-      const user = await account.get();
-      return user;
-    } catch {
-      // no-op
-    }
+  if (!session?.value) return null;
+
+  const { account } = await createSessionClient(session.value);
+
+  try {
+    const user = await account.get();
+    return user;
+  } catch (error) {
+    console.error("Failed to get user:", error);
+    return null;
   }
-
-  return null;
 }

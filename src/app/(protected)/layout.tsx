@@ -44,14 +44,6 @@ export default async function ProtectedLayout({
                 <LogOut />
               </Button>
             </div>
-            {/* <nav className="flex gap-5 items-center font-semibold">
-              <Link href="/">Home</Link>
-              <Link href="/#how-it-works">How it works</Link>
-              <Link href="/#quick-stats">Quick stats</Link>
-              <Link href="/get-help">
-                <Button size="sm">Get started</Button>
-              </Link>
-            </nav> */}
           </div>
         </header>
         <div className="flex">

@@ -2,7 +2,7 @@ import "server-only";
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { cookies } from "next/headers";
 
-export default async function axiosInstance<T = any>(
+export default async function axiosInstance<T = unknown>(
   config: AxiosRequestConfig
 ): Promise<AxiosResponse<T>> {
   const cookieStore = await cookies();

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createAdminClient } from "@/lib/appwrite";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { requiredEnv } from "@/lib/utils";
 import { ID, Permission, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
+import { cookies } from "next/headers";
 
 // Server-side validation schema mirrors the client form.
 const incidentSchema = z.object({
@@ -87,9 +88,28 @@ export async function POST(req: NextRequest) {
     );
     const MEDIA_BUCKET_ID = requiredEnv("APPWRITE_MEDIA_BUCKET_ID");
 
-    // If you have authentication, associate the incident with the current user via a header or middleware.
-    // For now, optionally read a userId from a header (or set to null/anonymous).
-    const userId = req.headers.get("x-user-id") || null;
+    const cookieStore = await cookies();
+    const session = cookieStore.get("session")?.value;
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized - No session found" },
+        { status: 401 }
+      );
+    }
+
+    const { account } = await createSessionClient(session);
+    let user;
+    try {
+      user = await account.get();
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Unauthorized - Invalid session" },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.$id;
 
     // Create the document first, to get a canonical reference ID
     const incidentId = ID.unique();
@@ -106,7 +126,7 @@ export async function POST(req: NextRequest) {
         lng: coords.lng,
         userId,
         status: "open",
-        mediaIds: [] as string[],
+        // mediaIds: [] as string[],
       },
       [
         // Permissions: allow the owner to read/update; admins have full access.
@@ -150,13 +170,33 @@ export async function POST(req: NextRequest) {
         INCIDENTS_COLLECTION_ID,
         incidentId,
         {
+          type: parsed.data.type,
+          description: parsed.data.description,
+          address: parsed.data.address,
+          urgency: parsed.data.urgency,
+          lat: coords.lat,
+          lng: coords.lng,
+          userId,
+          status: "open",
           mediaIds: uploadedIds,
-        }
+        },
+        [
+          ...(userId
+            ? [
+                Permission.read(Role.user(userId)),
+                Permission.update(Role.user(userId)),
+              ]
+            : []),
+          Permission.read(Role.team("admins")),
+          Permission.update(Role.team("admins")),
+          Permission.delete(Role.team("admins")),
+        ]
       );
     }
 
+    console.log("See db document:", doc);
     return NextResponse.json({ id: incidentId });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("POST /api/incidents error:", e);
     return NextResponse.json(
       { error: "Internal Server Error" },

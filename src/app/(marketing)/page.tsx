@@ -2,13 +2,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import illustration from "@/assets/images/illustration.svg";
 import Image from "next/image";
-import {
-  HeartHandshake,
-  Megaphone,
-  Siren,
-  TriangleAlert,
-  Users,
-} from "lucide-react";
+import { HeartHandshake, Megaphone, Siren } from "lucide-react";
 
 export default function Home() {
   return (
@@ -61,7 +55,7 @@ export default function Home() {
       {/* How it works section */}
       <section
         id="how-it-works"
-        className="p-5 flex flex-col gap-10 items-center"
+        className="p-5 py-20 flex flex-col gap-10 items-center"
       >
         <h2 className="text-2xl md:text-3xl font-bold">How it works</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">

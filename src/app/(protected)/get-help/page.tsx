@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import type { Map as LeafletMap, Marker, LeafletMouseEvent } from "leaflet";
 
 // Validation schema
 const incidentSchema = z.object({
@@ -93,8 +94,8 @@ export default function GetHelpPage() {
   const [successRefId, setSuccessRefId] = useState<string | null>(null);
 
   // Leaflet refs
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Accessible ids
@@ -150,8 +151,8 @@ export default function GetHelpPage() {
 
   // Initialize Leaflet dynamically on client
   useEffect(() => {
-    let L: any;
-    let mapInst: any;
+    let L: typeof import("leaflet");
+    let mapInst: LeafletMap;
     async function initMap() {
       try {
         const leaflet = await import("leaflet");
@@ -171,7 +172,7 @@ export default function GetHelpPage() {
           mapInst.setView([lat, lng], 14);
         }
 
-        mapInst.on("click", (e: any) => {
+        mapInst.on("click", (e: LeafletMouseEvent) => {
           const { lat, lng } = e.latlng;
           form.setValue("lat", lat, { shouldValidate: true });
           form.setValue("lng", lng, { shouldValidate: true });
@@ -205,7 +206,7 @@ export default function GetHelpPage() {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const { latitude, longitude } = pos.coords;
         form.setValue("lat", latitude, { shouldValidate: true });
         form.setValue("lng", longitude, { shouldValidate: true });
@@ -215,12 +216,10 @@ export default function GetHelpPage() {
             markerRef.current.setLatLng([latitude, longitude]);
           } else {
             // Add a basic marker if leaflet is available
-            const L = (window as any).L;
-            if (L) {
-              markerRef.current = L.marker([latitude, longitude]).addTo(
-                mapRef.current
-              );
-            }
+            const leaflet = await import("leaflet");
+            markerRef.current = leaflet
+              .marker([latitude, longitude])
+              .addTo(mapRef.current);
           }
         }
       },
@@ -319,10 +318,12 @@ export default function GetHelpPage() {
         lng: 0,
         media: [],
       });
-    } catch (e: any) {
-      alert(
-        e?.message || "Something went wrong while submitting your incident."
-      );
+    } catch (e: unknown) {
+      const message =
+        e instanceof Error
+          ? e.message
+          : "Something went wrong while submitting your incident.";
+      alert(message);
     } finally {
       setIsUploading(false);
       setProgress(0);
