@@ -5,38 +5,39 @@ import { requiredEnv } from "@/lib/utils";
 import { ID, Permission, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { cookies } from "next/headers";
+import { incidentCreateSchema, incidentDocSchema } from "@/schemas/incident";
 
 // Server-side validation schema mirrors the client form.
-const incidentSchema = z.object({
-  type: z.string().min(1),
-  description: z.string().min(10),
-  address: z.string().min(3),
-  urgency: z.enum(["low", "medium", "high"]),
-  coords: z
-    .object({
-      lat: z.number(),
-      lng: z.number(),
-    })
-    .or(
-      z
-        .string()
-        .transform((s) => {
-          try {
-            return JSON.parse(s);
-          } catch {
-            return null;
-          }
-        })
-        .pipe(
-          z
-            .object({
-              lat: z.number(),
-              lng: z.number(),
-            })
-            .nullable()
-        )
-    ),
-});
+// const incidentSchema = z.object({
+//   type: z.string().min(1),
+//   description: z.string().min(10),
+//   address: z.string().min(3),
+//   urgency: z.enum(["low", "medium", "high"]),
+//   coords: z
+//     .object({
+//       lat: z.number(),
+//       lng: z.number(),
+//     })
+//     .or(
+//       z
+//         .string()
+//         .transform((s) => {
+//           try {
+//             return JSON.parse(s);
+//           } catch {
+//             return null;
+//           }
+//         })
+//         .pipe(
+//           z
+//             .object({
+//               lat: z.number(),
+//               lng: z.number(),
+//             })
+//             .nullable()
+//         )
+//     ),
+// });
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,21 +48,17 @@ export async function POST(req: NextRequest) {
       description: String(formData.get("description") || ""),
       address: String(formData.get("address") || ""),
       urgency: String(formData.get("urgency") || "medium"),
-      coords: formData.get("coords"),
+      lat: Number(formData.get("lat") || 0),
+      lng: Number(formData.get("lng") || 0),
     };
 
-    const parsed = incidentSchema.safeParse(values);
+    const parsed = incidentCreateSchema.safeParse(values);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid request", issues: parsed.error.issues },
         { status: 400 }
       );
     }
-
-    const coords =
-      typeof parsed.data.coords === "object" && parsed.data.coords
-        ? parsed.data.coords
-        : { lat: 0, lng: 0 };
 
     // Extract files (max 5)
     const files = formData.getAll("media").filter(Boolean) as File[];
@@ -122,8 +119,8 @@ export async function POST(req: NextRequest) {
         description: parsed.data.description,
         address: parsed.data.address,
         urgency: parsed.data.urgency,
-        lat: coords.lat,
-        lng: coords.lng,
+        lat: parsed.data.lat,
+        lng: parsed.data.lng,
         userId,
         status: "open",
         // mediaIds: [] as string[],
@@ -174,8 +171,8 @@ export async function POST(req: NextRequest) {
           description: parsed.data.description,
           address: parsed.data.address,
           urgency: parsed.data.urgency,
-          lat: coords.lat,
-          lng: coords.lng,
+          lat: parsed.data.lat,
+          lng: parsed.data.lng,
           userId,
           status: "open",
           mediaIds: uploadedIds,
@@ -214,7 +211,9 @@ export async function GET() {
       "APPWRITE_INCIDENTS_COLLECTION_ID"
     );
     const docs = await databases.listDocuments(DB_ID, INCIDENTS_COLLECTION_ID);
-    return NextResponse.json(docs.documents);
+    const safe = incidentDocSchema.parse(docs.documents);
+    return safe;
+    // return NextResponse.json(docs.documents);
   } catch (e: unknown) {
     console.error("GET /api/incidents error:", e);
     return NextResponse.json(

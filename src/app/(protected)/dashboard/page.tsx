@@ -1,8 +1,28 @@
-export default function DashboardPage() {
+import axiosInstance from "@/lib/axiosInstance";
+import IncidentCard from "@/components/dashboard/incident-card";
+import { incidentDocsSchema } from "@/schemas/incident";
+
+export default async function DashboardPage() {
+  const { data } = await axiosInstance({
+    method: "GET",
+    url: "/api/incidents",
+  });
+  const incidents = incidentDocsSchema.parse(data);
+  console.log(incidents);
   return (
     <main className="p-5">
-      <section>
-        <h2>Recent Incidents</h2>
+      <section className="space-y-5">
+        <h2 className="font-bold text-2xl">Recent Incidents</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {incidents.map((incident: any) => (
+            <IncidentCard
+              key={incident.$id}
+              description={incident.description}
+              type={incident.type}
+              urgency={incident.urgency}
+            />
+          ))}
+        </div>
       </section>
     </main>
   );

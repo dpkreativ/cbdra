@@ -16,16 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useFormStatus } from "react-dom";
-
-const loginSchema = z.object({
-  email: z
-    .string({ error: "Email is required" })
-    .min(1, "Email is required")
-    .email("Enter a valid email address"),
-  password: z
-    .string({ error: "Password is required" })
-    .min(6, "Password must be at least 6 characters"),
-});
+import { loginSchema } from "@/schemas/auth";
 
 export function LoginForm({
   action,

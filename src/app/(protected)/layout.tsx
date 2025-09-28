@@ -29,7 +29,7 @@ export default async function ProtectedLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <header className="sticky top-0 z-50 bg-white/50 backdrop-blur-3xl">
+        <header className="sticky top-0 z-50 bg-white/50 backdrop-blur-3xl border-b">
           <div className="p-5 w-full flex items-center justify-between gap-5">
             <Link href="/" className="flex items-center gap-2">
               <Image src={mascot} alt="Mascot" className="w-5" />
@@ -46,8 +46,24 @@ export default async function ProtectedLayout({
             </div>
           </div>
         </header>
-        <div className="flex">
-          {/* <aside className="p-5 w-full max-w-1/5">A Sidebar</aside> */}
+        <div className="flex h-full">
+          <aside className="p-5 pl-0 w-full max-w-1/5 flex flex-col gap-5">
+            <Link
+              href="/dashboard"
+              className="px-5 py-3 rounded-r-xl bg-accent"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/dashboard/resources"
+              className="px-5 py-3 rounded-r-xl"
+            >
+              Resources
+            </Link>
+            <Link href="/dashboard/users" className="px-5 py-3 rounded-r-xl">
+              Users
+            </Link>
+          </aside>
           {children}
         </div>
       </body>

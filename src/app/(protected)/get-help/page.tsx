@@ -25,28 +25,29 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import type { Map as LeafletMap, Marker, LeafletMouseEvent } from "leaflet";
+import { incidentCreateSchema } from "@/schemas/incident";
 
 // Validation schema
-const incidentSchema = z.object({
-  type: z
-    .string({ error: "Incident type is required" })
-    .min(1, "Incident type is required"),
-  description: z
-    .string({ error: "Description is required" })
-    .min(10, "Please provide at least 10 characters"),
-  address: z
-    .string({ error: "Address is required" })
-    .min(3, "Please provide a valid address"),
-  urgency: z.enum(["low", "medium", "high"], {
-    error: "Urgency is required",
-  }),
-  lat: z.number({ error: "Latitude is required" }),
-  lng: z.number({ error: "Longitude is required" }),
-  media: z
-    .array(z.instanceof(File))
-    .max(5, "You can upload up to 5 photos")
-    .optional(),
-});
+// const incidentSchema = z.object({
+//   type: z
+//     .string({ error: "Incident type is required" })
+//     .min(1, "Incident type is required"),
+//   description: z
+//     .string({ error: "Description is required" })
+//     .min(10, "Please provide at least 10 characters"),
+//   address: z
+//     .string({ error: "Address is required" })
+//     .min(3, "Please provide a valid address"),
+//   urgency: z.enum(["low", "medium", "high"], {
+//     error: "Urgency is required",
+//   }),
+//   lat: z.number({ error: "Latitude is required" }),
+//   lng: z.number({ error: "Longitude is required" }),
+//   media: z
+//     .array(z.instanceof(File))
+//     .max(5, "You can upload up to 5 photos")
+//     .optional(),
+// });
 
 // Simple in-browser image compression via canvas (strips EXIF)
 async function compressImage(
@@ -104,8 +105,8 @@ export default function GetHelpPage() {
   const idAddr = useMemo(() => "incident-address", []);
   const idUrg = useMemo(() => "incident-urgency", []);
 
-  const form = useForm<z.infer<typeof incidentSchema>>({
-    resolver: zodResolver(incidentSchema),
+  const form = useForm<z.infer<typeof incidentCreateSchema>>({
+    resolver: zodResolver(incidentCreateSchema),
     mode: "onBlur",
     reValidateMode: "onChange",
     defaultValues: {
@@ -258,7 +259,7 @@ export default function GetHelpPage() {
   }
 
   // Submit with multipart + progress
-  async function onSubmit(values: z.infer<typeof incidentSchema>) {
+  async function onSubmit(values: z.infer<typeof incidentCreateSchema>) {
     setIsUploading(true);
     setProgress(0);
     setSuccessRefId(null);

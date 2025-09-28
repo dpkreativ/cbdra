@@ -1,7 +1,25 @@
-export default function IncidentCard({ title }: { title: string }) {
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function IncidentCard({
+  type,
+  description,
+  urgency,
+}: {
+  type: string;
+  description: string;
+  urgency: string;
+}) {
   return (
-    <div className="p-5 rounded-2xl">
-      <h1>{title}</h1>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex gap-2 justify-between">
+          <p>{type}</p>
+          <p>Urgency: {urgency}</p>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>{description}</p>
+      </CardContent>
+    </Card>
   );
 }

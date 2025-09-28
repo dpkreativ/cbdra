@@ -9,7 +9,7 @@ export async function createAdminClient() {
   const client = new Client()
     .setEndpoint(requiredEnv("NEXT_PUBLIC_APPWRITE_ENDPOINT"))
     .setProject(requiredEnv("NEXT_PUBLIC_APPWRITE_PROJECT_ID"))
-    .setKey(requiredEnv("NEXT_PUBLIC_APPWRITE_API_KEY"));
+    .setKey(requiredEnv("APPWRITE_API_KEY"));
 
   return {
     client,
