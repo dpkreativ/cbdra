@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { requiredEnv } from "@/lib/utils";
 import { ID, Permission, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { cookies } from "next/headers";
-import {
-  incidentCreateSchema,
-  incidentDocSchema,
-  incidentDocsSchema,
-} from "@/schemas/incident";
+import { incidentCreateSchema, incidentDocsSchema } from "@/schemas/incident";
 
 export async function POST(req: NextRequest) {
   try {

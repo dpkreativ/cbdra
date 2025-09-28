@@ -15,7 +15,7 @@ export default async function DashboardPage() {
       <section className="space-y-5">
         <h2 className="font-bold text-2xl">Recent Incidents</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {incidents.map((incident: any) => (
+          {incidents.map((incident) => (
             <IncidentCard
               key={incident.$id}
               description={incident.description}
