@@ -7,8 +7,9 @@ export default async function DashboardPage() {
     method: "GET",
     url: "/api/incidents",
   });
+
   const incidents = incidentDocsSchema.parse(data);
-  console.log(incidents);
+
   return (
     <main className="p-5">
       <section className="space-y-5">

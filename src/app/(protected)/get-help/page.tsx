@@ -26,28 +26,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import type { Map as LeafletMap, Marker, LeafletMouseEvent } from "leaflet";
 import { incidentCreateSchema } from "@/schemas/incident";
-
-// Validation schema
-// const incidentSchema = z.object({
-//   type: z
-//     .string({ error: "Incident type is required" })
-//     .min(1, "Incident type is required"),
-//   description: z
-//     .string({ error: "Description is required" })
-//     .min(10, "Please provide at least 10 characters"),
-//   address: z
-//     .string({ error: "Address is required" })
-//     .min(3, "Please provide a valid address"),
-//   urgency: z.enum(["low", "medium", "high"], {
-//     error: "Urgency is required",
-//   }),
-//   lat: z.number({ error: "Latitude is required" }),
-//   lng: z.number({ error: "Longitude is required" }),
-//   media: z
-//     .array(z.instanceof(File))
-//     .max(5, "You can upload up to 5 photos")
-//     .optional(),
-// });
+import { Icon } from "@/components/ui/icon";
 
 // Simple in-browser image compression via canvas (strips EXIF)
 async function compressImage(
@@ -158,8 +137,11 @@ export default function GetHelpPage() {
       try {
         const leaflet = await import("leaflet");
         L = leaflet;
+
         if (!mapContainerRef.current) return;
-        mapInst = L.map(mapContainerRef.current).setView([5.6037, -0.187], 12);
+
+        mapInst = L.map(mapContainerRef.current).setView([6.5244, 3.3792], 12);
+
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: "&copy; OpenStreetMap contributors",
@@ -269,10 +251,8 @@ export default function GetHelpPage() {
       formData.append("description", values.description);
       formData.append("address", values.address);
       formData.append("urgency", values.urgency);
-      formData.append(
-        "coords",
-        JSON.stringify({ lat: values.lat, lng: values.lng })
-      );
+      formData.append("lat", values.lat.toString());
+      formData.append("lng", values.lng.toString());
       (values.media || []).forEach((file) => formData.append("media", file));
 
       await new Promise<void>((resolve, reject) => {
@@ -367,17 +347,75 @@ export default function GetHelpPage() {
                       defaultValue={field.value}
                     >
                       <SelectTrigger
+                        className="w-full"
                         id={idType}
                         aria-invalid={!!form.formState.errors.type}
                       >
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="medical">Medical</SelectItem>
-                        <SelectItem value="fire">Fire</SelectItem>
-                        <SelectItem value="crime">Crime</SelectItem>
-                        <SelectItem value="disaster">Disaster</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem
+                          value="water"
+                          className="flex items-center gap-5"
+                        >
+                          <Icon icon="carbon:flood" width="24" height="24" />
+                          <span>Water</span>
+                        </SelectItem>
+                        <SelectItem
+                          value="biological"
+                          className="flex items-center gap-5"
+                        >
+                          <Icon
+                            icon="solar:virus-outline"
+                            width="24"
+                            height="24"
+                          />
+                          <span>Biological</span>
+                        </SelectItem>
+                        <SelectItem
+                          value="fire"
+                          className="flex items-center gap-5"
+                        >
+                          <Icon icon="carbon:fire" width="24" height="24" />
+                          <span>Fire</span>
+                        </SelectItem>
+                        <SelectItem
+                          value="geological"
+                          className="flex items-center gap-5"
+                        >
+                          <Icon
+                            icon="carbon:earthquake"
+                            width="24"
+                            height="24"
+                          />
+                          <span>Geological</span>
+                        </SelectItem>
+
+                        <SelectItem
+                          value="crime"
+                          className="flex items-center gap-5"
+                        >
+                          <Icon icon="carbon:police" width="24" height="24" />
+                          <span>Crime</span>
+                        </SelectItem>
+                        <SelectItem
+                          value="man-made"
+                          className="flex items-center gap-5"
+                        >
+                          <Icon
+                            icon="hugeicons:accident"
+                            width="24"
+                            height="24"
+                          />
+                          <span>Man-Made</span>
+                        </SelectItem>
+                        <SelectItem
+                          value="industrial"
+                          className="flex items-center gap-5"
+                        >
+                          <Icon icon="carbon:industry" width="24" height="24" />
+                          <span>Industrial</span>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -449,7 +487,7 @@ export default function GetHelpPage() {
                 ref={mapContainerRef}
                 role="application"
                 aria-label="Map picker"
-                className="h-64 w-full rounded-md border"
+                className="z-0 h-64 w-full rounded-md border"
               />
               {mapError ? (
                 <p className="mt-2 text-sm text-muted-foreground">{mapError}</p>
@@ -470,7 +508,13 @@ export default function GetHelpPage() {
                   <FormItem>
                     <FormLabel>Latitude</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" {...field} />
+                      <Input
+                        type="number"
+                        step="any"
+                        readOnly
+                        aria-readonly
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

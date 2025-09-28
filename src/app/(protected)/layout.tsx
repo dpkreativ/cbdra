@@ -47,7 +47,7 @@ export default async function ProtectedLayout({
           </div>
         </header>
         <div className="flex h-full">
-          <aside className="p-5 pl-0 w-full max-w-1/5 flex flex-col gap-5">
+          <aside className="hidden p-5 pl-0 w-full max-w-1/5 md:flex flex-col gap-3">
             <Link
               href="/dashboard"
               className="px-5 py-3 rounded-r-xl bg-accent"

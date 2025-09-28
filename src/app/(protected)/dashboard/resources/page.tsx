@@ -1,3 +1,3 @@
 export default function ResourcesPage() {
-  return <main></main>;
+  return <main className="p-5">Resources</main>;
 }

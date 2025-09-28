@@ -5,39 +5,11 @@ import { requiredEnv } from "@/lib/utils";
 import { ID, Permission, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { cookies } from "next/headers";
-import { incidentCreateSchema, incidentDocSchema } from "@/schemas/incident";
-
-// Server-side validation schema mirrors the client form.
-// const incidentSchema = z.object({
-//   type: z.string().min(1),
-//   description: z.string().min(10),
-//   address: z.string().min(3),
-//   urgency: z.enum(["low", "medium", "high"]),
-//   coords: z
-//     .object({
-//       lat: z.number(),
-//       lng: z.number(),
-//     })
-//     .or(
-//       z
-//         .string()
-//         .transform((s) => {
-//           try {
-//             return JSON.parse(s);
-//           } catch {
-//             return null;
-//           }
-//         })
-//         .pipe(
-//           z
-//             .object({
-//               lat: z.number(),
-//               lng: z.number(),
-//             })
-//             .nullable()
-//         )
-//     ),
-// });
+import {
+  incidentCreateSchema,
+  incidentDocSchema,
+  incidentDocsSchema,
+} from "@/schemas/incident";
 
 export async function POST(req: NextRequest) {
   try {
@@ -211,9 +183,8 @@ export async function GET() {
       "APPWRITE_INCIDENTS_COLLECTION_ID"
     );
     const docs = await databases.listDocuments(DB_ID, INCIDENTS_COLLECTION_ID);
-    const safe = incidentDocSchema.parse(docs.documents);
-    return safe;
-    // return NextResponse.json(docs.documents);
+    const safe = incidentDocsSchema.parse(docs.documents);
+    return NextResponse.json(safe);
   } catch (e: unknown) {
     console.error("GET /api/incidents error:", e);
     return NextResponse.json(
