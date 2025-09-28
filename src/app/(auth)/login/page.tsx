@@ -12,7 +12,7 @@ export default function Page() {
       <LoginForm action={login} />
 
       <p className="text-muted-foreground text-center md:text-left">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link className="text-primary underline font-semibold" href="/signup">
           Sign up
         </Link>

@@ -91,3 +91,23 @@ export async function signout() {
   cookieStore.delete("session");
   redirect("/login");
 }
+
+/**
+ * Get the current user's session from the cookie
+ */
+export async function getUser() {
+  const cookieStore = await cookies();
+  const session = cookieStore.get("session")?.value;
+
+  if (session) {
+    try {
+      const { account } = await createSessionClient(session);
+      const user = await account.get();
+      return user;
+    } catch {
+      // no-op
+    }
+  }
+
+  return null;
+}
