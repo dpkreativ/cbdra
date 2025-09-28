@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     let user;
     try {
       user = await account.get();
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: "Unauthorized - Invalid session" },
         { status: 401 }
@@ -198,6 +198,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: incidentId });
   } catch (e: unknown) {
     console.error("POST /api/incidents error:", e);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+// GET /api/incidents
+export async function GET() {
+  try {
+    const { databases } = await createAdminClient();
+    const DB_ID = requiredEnv("APPWRITE_DB_ID");
+    const INCIDENTS_COLLECTION_ID = requiredEnv(
+      "APPWRITE_INCIDENTS_COLLECTION_ID"
+    );
+    const docs = await databases.listDocuments(DB_ID, INCIDENTS_COLLECTION_ID);
+    return NextResponse.json(docs.documents);
+  } catch (e: unknown) {
+    console.error("GET /api/incidents error:", e);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
