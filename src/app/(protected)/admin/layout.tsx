@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
-import "leaflet/dist/leaflet.css";
 import { getUser } from "@/actions/auth";
 import { AdminHeader } from "@/components/layout/header";
 import { AdminSidebar } from "@/components/layout/sidebar";

@@ -24,59 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import type { Map as LeafletMap, Marker, LeafletMouseEvent } from "leaflet";
 import { incidentCreateSchema } from "@/schemas/incident";
 import { Icon } from "@/components/ui/icon";
-
-// Simple in-browser image compression via canvas (strips EXIF)
-async function compressImage(
-  file: File,
-  maxWidth = 1600,
-  quality = 0.8
-): Promise<Blob> {
-  const img = document.createElement("img");
-  const objectUrl = URL.createObjectURL(file);
-  try {
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = (e) => reject(e);
-      img.src = objectUrl;
-    });
-    const canvas = document.createElement("canvas");
-    const scale = Math.min(1, maxWidth / img.width);
-    canvas.width = Math.floor(img.width * scale);
-    canvas.height = Math.floor(img.height * scale);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Canvas not supported");
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const blob: Blob | null = await new Promise((resolve) =>
-      canvas.toBlob(
-        (b) => resolve(b),
-        file.type === "image/png" ? "image/png" : "image/jpeg",
-        quality
-      )
-    );
-    if (!blob) throw new Error("Failed to compress image");
-    return blob;
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
-// Local storage draft key
-const DRAFT_KEY = "incident:draft";
+import { handleMediaChange } from "@/lib/utils";
+import dynamic from "next/dynamic";
 
 export default function GetHelpPage() {
-  const [geoError, setGeoError] = useState<string | null>(null);
-  const [mapError, setMapError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState<number>(0);
   const [successRefId, setSuccessRefId] = useState<string | null>(null);
-
-  // Leaflet refs
-  const mapRef = useRef<LeafletMap | null>(null);
-  const markerRef = useRef<Marker | null>(null);
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Accessible ids
   const idType = useMemo(() => "incident-type", []);
@@ -99,146 +55,14 @@ export default function GetHelpPage() {
     },
   });
 
-  // Load draft from localStorage (exclude files)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) {
-        const draft = JSON.parse(raw);
-        form.reset({ ...form.getValues(), ...draft });
-      }
-    } catch {
-      // no-op
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Persist draft to localStorage (exclude files)
-  useEffect(() => {
-    const sub = form.watch((values) => {
-      const { type, description, address, urgency, lat, lng } = values;
-      try {
-        localStorage.setItem(
-          DRAFT_KEY,
-          JSON.stringify({ type, description, address, urgency, lat, lng })
-        );
-      } catch {
-        // no-op
-      }
-    });
-    return () => sub.unsubscribe();
-  }, [form]);
-
-  // Initialize Leaflet dynamically on client
-  useEffect(() => {
-    let L: typeof import("leaflet");
-    let mapInst: LeafletMap;
-    async function initMap() {
-      try {
-        const leaflet = await import("leaflet");
-        L = leaflet;
-
-        if (!mapContainerRef.current) return;
-
-        mapInst = L.map(mapContainerRef.current).setView([6.5244, 3.3792], 12);
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          attribution: "&copy; OpenStreetMap contributors",
-        }).addTo(mapInst);
-        mapRef.current = mapInst;
-
-        // Place existing marker if coords present
-        const { lat, lng } = form.getValues();
-        if (lat && lng) {
-          markerRef.current = L.marker([lat, lng]).addTo(mapInst);
-          mapInst.setView([lat, lng], 14);
-        }
-
-        mapInst.on("click", (e: LeafletMouseEvent) => {
-          const { lat, lng } = e.latlng;
-          form.setValue("lat", lat, { shouldValidate: true });
-          form.setValue("lng", lng, { shouldValidate: true });
-          if (markerRef.current) {
-            markerRef.current.setLatLng([lat, lng]);
-          } else {
-            markerRef.current = L.marker([lat, lng]).addTo(mapInst);
-          }
-        });
-      } catch {
-        setMapError("Map failed to load. You can still enter an address.");
-      }
-    }
-
-    initMap();
-    return () => {
-      try {
-        mapRef.current?.remove?.();
-      } catch {
-        // no-op
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Geolocation button
-  async function useCurrentLocation() {
-    setGeoError(null);
-    if (!navigator.geolocation) {
-      setGeoError("Geolocation is not supported by your browser.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        form.setValue("lat", latitude, { shouldValidate: true });
-        form.setValue("lng", longitude, { shouldValidate: true });
-        if (mapRef.current) {
-          mapRef.current.setView([latitude, longitude], 14);
-          if (markerRef.current) {
-            markerRef.current.setLatLng([latitude, longitude]);
-          } else {
-            // Add a basic marker if leaflet is available
-            const leaflet = await import("leaflet");
-            markerRef.current = leaflet
-              .marker([latitude, longitude])
-              .addTo(mapRef.current);
-          }
-        }
-      },
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          setGeoError(
-            "Location permission denied. Please enable it in your browser settings."
-          );
-        } else {
-          setGeoError("Unable to fetch your location. Please try again.");
-        }
-      }
-    );
-  }
-
-  // Media selection and compression
-  async function handleMediaChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    const limited = files.slice(0, 5);
-    // Guard size 10MB before compression
-    const oversized = limited.find((f) => f.size > 10 * 1024 * 1024);
-    if (oversized) {
-      alert("Please select images smaller than 10MB.");
-      return;
-    }
-    const compressed: File[] = [];
-    for (const f of limited) {
-      const blob = await compressImage(f);
-      compressed.push(
-        new File([blob], f.name.replace(/\.(heic|heif)$/i, ".jpg"), {
-          type: blob.type || "image/jpeg",
-        })
-      );
-    }
-    form.setValue("media", compressed, { shouldValidate: true });
-  }
+  const Map = useMemo(
+    () =>
+      dynamic(() => import("@/components/dashboard/map"), {
+        loading: () => <p>Loading map...</p>,
+        ssr: false,
+      }),
+    []
+  );
 
   // Submit with multipart + progress
   async function onSubmit(values: z.infer<typeof incidentCreateSchema>) {
@@ -283,13 +107,6 @@ export default function GetHelpPage() {
         xhr.send(formData);
       });
 
-      // Clear draft on success
-      try {
-        localStorage.removeItem(DRAFT_KEY);
-      } catch {
-        // no-op
-      }
-
       form.reset({
         type: "",
         description: "",
@@ -330,11 +147,7 @@ export default function GetHelpPage() {
         </div>
       ) : (
         <Form {...form}>
-          <form
-            className="space-y-5"
-            onSubmit={form.handleSubmit(onSubmit)}
-            aria-describedby={geoError ? "geo-error" : undefined}
-          >
+          <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
             {/* Incident Type */}
             <FormField
               control={form.control}
@@ -471,69 +284,9 @@ export default function GetHelpPage() {
               )}
             />
 
-            {/* Map + Current Location */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium">Location on map</label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={useCurrentLocation}
-                >
-                  Use current location
-                </Button>
-              </div>
-              <div
-                ref={mapContainerRef}
-                role="application"
-                aria-label="Map picker"
-                className="z-0 h-64 w-full rounded-md border"
-              />
-              {mapError ? (
-                <p className="mt-2 text-sm text-muted-foreground">{mapError}</p>
-              ) : null}
-              {geoError ? (
-                <p id="geo-error" className="mt-2 text-sm text-destructive">
-                  {geoError}
-                </p>
-              ) : null}
-            </div>
-
-            {/* Lat/Lng (visible for transparency; could be hidden) */}
-            <div className="grid grid-cols-2 gap-3">
-              <FormField
-                control={form.control}
-                name="lat"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Latitude</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="any"
-                        readOnly
-                        aria-readonly
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lng"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longitude</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="any" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Map */}
+            <div className="w-full max-w-xl mx-auto h-[480px]">
+              <Map posix={[38.7946, 106.5348]} />
             </div>
 
             {/* Urgency */}

@@ -3,6 +3,7 @@ import IncidentCard from "@/components/dashboard/incident-card";
 import { Button } from "@/components/ui/button";
 import axiosInstance from "@/lib/axiosInstance";
 import { incidentDocsSchema } from "@/schemas/incident";
+import Link from "next/link";
 
 export default async function UserDashboardPage() {
   const user = await getUser();
@@ -23,7 +24,9 @@ export default async function UserDashboardPage() {
         {/* Quick actions */}
         <h2 className="text-xl font-semibold">Quick Actions</h2>
         <div className="grid md:grid-cols-2 gap-5">
-          <Button className="py-10">Report an Incident</Button>
+          <Link href="/user/get-help">
+            <Button className="py-10">Report an Incident</Button>
+          </Link>
           <Button className="py-10">My Reports</Button>
         </div>
       </section>
