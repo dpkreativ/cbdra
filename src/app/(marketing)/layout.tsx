@@ -5,10 +5,8 @@ import mascot from "@/assets/images/mascot-1.svg";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getUser } from "@/actions/auth";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import mascotWhite from "@/assets/images/mascot-white.svg";
 import { Icon } from "@/components/ui/icon";
 
 const geistSans = Geist({
@@ -26,12 +24,11 @@ export const metadata: Metadata = {
   description: "Get the help you need during emergencies.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getUser();
   return (
     <html lang="en">
       <body

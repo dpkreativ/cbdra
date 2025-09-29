@@ -33,7 +33,7 @@ export default async function UserDashboardPage() {
 
       <section className="flex flex-col gap-5">
         <h2 className="text-xl font-semibold">
-          Here's what's happening in your community
+          Here&apos;s what&apos;s happening in your community
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {incidents.map((incident) => (
