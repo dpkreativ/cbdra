@@ -3,6 +3,8 @@ import { getUser, signout } from "@/actions/auth";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Metadata } from "next";
 import "@/app/globals.css";
+import Link from "next/link";
+import { UserSidebar } from "@/components/layout/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +33,10 @@ export default async function UserLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <UserHeader user={user} signout={signout} />
-        {children}
+        <div className="flex h-full">
+          <UserSidebar />
+          {children}
+        </div>
       </body>
     </html>
   );

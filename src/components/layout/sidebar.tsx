@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export function AdminSidebar() {
   return (
@@ -17,5 +18,23 @@ export function AdminSidebar() {
 }
 
 export function UserSidebar() {
-  return <aside></aside>;
+  return (
+    <aside className="hidden p-5 pl-0 w-full max-w-1/5 md:flex flex-col">
+      <Link href="/user/dashboard" className="px-5 py-3 rounded-r-xl">
+        <Button variant="ghost" className="w-full justify-start">
+          Dashboard
+        </Button>
+      </Link>
+      <Link href="/user/get-help" className="px-5 py-3 rounded-r-xl">
+        <Button variant="ghost" className="w-full justify-start">
+          Report an Incident
+        </Button>
+      </Link>
+      <Link href="/user/my-reports" className="px-5 py-3 rounded-r-xl">
+        <Button variant="ghost" className="w-full justify-start">
+          My Reports
+        </Button>
+      </Link>
+    </aside>
+  );
 }

@@ -6,18 +6,18 @@ export default async function UserDashboardPage() {
   const user = await getUser();
 
   return (
-    <main className="p-5 space-y-5">
-      <section className="flex flex-col gap-5">
+    <main className="p-5 space-y-10">
+      <section className="flex flex-col gap-10">
         {/* Welcome message */}
-        <p>Welcome back, {user?.name}!</p>
+        <p className="text-xl font-semibold">Welcome back, {user?.name}!</p>
 
-        {/* Quick actions */}
-        <h2 className="text-xl font-semibold">Quick Actions</h2>
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:flex gap-5">
           <Link href="/user/get-help">
-            <Button className="py-10">Report an Incident</Button>
+            <Button className="py-5">Report an Incident</Button>
           </Link>
-          <Button className="py-10">My Reports</Button>
+          <Link href="/user/my-reports">
+            <Button className="py-5">My Reports</Button>
+          </Link>
         </div>
       </section>
 
