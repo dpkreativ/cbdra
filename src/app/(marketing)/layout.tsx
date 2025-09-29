@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Icon } from "@/components/ui/icon";
+import { getUser } from "@/actions/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +25,12 @@ export const metadata: Metadata = {
   description: "Get the help you need during emergencies.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUser();
   return (
     <html lang="en">
       <body
@@ -47,12 +49,15 @@ export default function RootLayout({
               <Link href="/">Home</Link>
               <Link href="/#how-it-works">How it works</Link>
               <Link href="/#quick-stats">Quick stats</Link>
-              <Link href="/login">
-                <Button size="lg">
-                  <Icon icon="material-symbols:login" width="24" height="24" />
-                  Get started
-                </Button>
-              </Link>
+              {user ? (
+                <Link href="/user/dashboard">
+                  <Button size="lg">Go to Dashboard</Button>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <Button size="lg">Get started</Button>
+                </Link>
+              )}
             </nav>
 
             {/* Mobile nav */}
@@ -70,16 +75,15 @@ export default function RootLayout({
                   <Link href="/">Home</Link>
                   <Link href="/#how-it-works">How it works</Link>
                   <Link href="/#quick-stats">Quick stats</Link>
-                  <Link href="/login">
-                    <Button size="lg">
-                      <Icon
-                        icon="material-symbols:login"
-                        width="24"
-                        height="24"
-                      />
-                      Get started
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <Link href="/user/dashboard">
+                      <Button size="lg">Go to Dashboard</Button>
+                    </Link>
+                  ) : (
+                    <Link href="/login">
+                      <Button size="lg">Get Started</Button>
+                    </Link>
+                  )}
                 </SheetContent>
               </Sheet>
             </nav>
