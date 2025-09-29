@@ -201,7 +201,7 @@ export function SignupForm() {
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">Community User</SelectItem>
+                    <SelectItem value="community">Community User</SelectItem>
                     <SelectItem value="volunteer">Volunteer</SelectItem>
                     <SelectItem value="ngo">NGO</SelectItem>
                     <SelectItem value="gov">Govt. Agency</SelectItem>

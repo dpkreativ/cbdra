@@ -46,12 +46,12 @@ export function LoginForm() {
     formData.append("email", values.email);
     formData.append("password", values.password);
 
-    const result = await login({ redirectTo: "/user/dashboard" }, formData);
+    const result = await login({}, formData); // Let backend decide redirect
 
     setLoading(false);
 
     if (result.success) {
-      router.push(result.redirectTo ?? "/");
+      router.push(result.redirectTo); // Always defined if success = true
     } else {
       setError(result.message ?? "Something went wrong, please try again.");
     }
@@ -60,6 +60,7 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+        {/* Email */}
         <FormField
           control={form.control}
           name="email"
@@ -72,6 +73,7 @@ export function LoginForm() {
                   type="email"
                   autoComplete="email"
                   placeholder="johndoe@mail.com"
+                  disabled={loading}
                   {...field}
                 />
               </FormControl>
@@ -79,6 +81,8 @@ export function LoginForm() {
             </FormItem>
           )}
         />
+
+        {/* Password */}
         <FormField
           control={form.control}
           name="password"
@@ -91,6 +95,7 @@ export function LoginForm() {
                     id={passwordFieldId}
                     type={showPassword ? "text" : "password"}
                     autoComplete="off"
+                    disabled={loading}
                     {...field}
                   />
                   <Button
@@ -99,6 +104,9 @@ export function LoginForm() {
                     size="icon"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-2 top-1/2 -translate-y-1/2"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -113,11 +121,14 @@ export function LoginForm() {
           )}
         />
 
-        {error && <p className="text-red-500">{error}</p>}
+        {/* Error */}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
+        {/* Submit */}
         <Button
           type="submit"
           disabled={!form.formState.isValid || loading}
+          aria-busy={loading}
           className="w-full"
         >
           {loading ? "Signing in..." : "Login"}
