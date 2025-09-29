@@ -157,31 +157,3 @@
     @apply scroll-smooth;
   }
 }
-
-/* Prevent map search input from overflowing on mobile */
-.leaflet-control-geosearch {
-  max-width: 90% !important; /* shrink on small screens */
-  width: auto !important;
-  left: 50% !important;
-  transform: translateX(-50%); /* center it horizontally */
-}
-
-.leaflet-control-geosearch .glass {
-  width: 100% !important; /* make input respect container */
-  max-width: 100% !important;
-  box-sizing: border-box;
-}
-
-@media (max-width: 640px) {
-  .leaflet-control-geosearch {
-    max-width: 85% !important;
-    font-size: 14px; /* smaller text on mobile */
-  }
-}
-
-/* Make all input/textarea/select placeholders use muted-foreground */
-input::placeholder,
-textarea::placeholder,
-select::placeholder {
-  color: var(--muted-foreground) / 50%;
-}

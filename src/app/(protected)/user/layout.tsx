@@ -3,7 +3,6 @@ import { getUser, signout } from "@/actions/auth";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Metadata } from "next";
 import "@/app/globals.css";
-import Link from "next/link";
 import { UserSidebar } from "@/components/layout/sidebar";
 
 const geistSans = Geist({

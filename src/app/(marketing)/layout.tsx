@@ -7,7 +7,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import { Icon } from "@/components/ui/icon";
 import { getUser } from "@/actions/auth";
 
 const geistSans = Geist({

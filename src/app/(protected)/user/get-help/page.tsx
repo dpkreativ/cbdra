@@ -1,6 +1,5 @@
 import IncidentForm from "@/components/dashboard/incidents/incident-form";
 import { LocationProvider } from "@/context/location-context";
-import Map from "@/components/dashboard/map";
 
 export default function IncidentReportPage() {
   return (
@@ -8,7 +7,6 @@ export default function IncidentReportPage() {
       <h1 className="text-xl font-bold">Report an Incident</h1>
       <LocationProvider>
         <div className="grid gap-5">
-          <Map />
           <IncidentForm />
         </div>
       </LocationProvider>
