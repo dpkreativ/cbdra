@@ -71,3 +71,15 @@ export async function handleMediaChange(
   }
   return compressed;
 }
+
+export function buildIncidentFormData(values: Record<string, unknown>) {
+  const fd = new FormData();
+  for (const [key, val] of Object.entries(values)) {
+    if (key === "media" && Array.isArray(val)) {
+      val.forEach((file) => fd.append("media", file));
+    } else {
+      fd.append(key, String(val));
+    }
+  }
+  return fd;
+}

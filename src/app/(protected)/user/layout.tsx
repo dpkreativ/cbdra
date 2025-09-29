@@ -25,7 +25,6 @@ export default async function UserLayout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
-  console.log(user);
   return (
     <html lang="en">
       <body

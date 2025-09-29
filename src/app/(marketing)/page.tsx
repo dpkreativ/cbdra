@@ -27,7 +27,7 @@ export default function Home() {
           </p>
 
           <div className="grid md:flex gap-5 items-center">
-            <Link href="/get-help">
+            <Link href="/user/get-help">
               <Button size="lg">
                 <Megaphone />
                 Report an Incident

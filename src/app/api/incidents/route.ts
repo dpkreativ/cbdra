@@ -4,21 +4,24 @@ import { requiredEnv } from "@/lib/utils";
 import { ID, Permission, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { cookies } from "next/headers";
-import { incidentCreateSchema, incidentDocsSchema } from "@/schemas/incident";
+import { incidentCreateSchema, incidentDocsSchema } from "@/schemas/incidents";
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
+    // Pull out values from formData
     const values = {
+      category: String(formData.get("category") || ""),
       type: String(formData.get("type") || ""),
       description: String(formData.get("description") || ""),
-      address: String(formData.get("address") || ""),
+      notes: String(formData.get("notes") || ""),
       urgency: String(formData.get("urgency") || "medium"),
       lat: Number(formData.get("lat") || 0),
       lng: Number(formData.get("lng") || 0),
     };
 
+    // Validate against schema
     const parsed = incidentCreateSchema.safeParse(values);
     if (!parsed.success) {
       return NextResponse.json(
@@ -27,37 +30,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Extract files (max 5)
+    // Extract up to 5 media files
     const files = formData.getAll("media").filter(Boolean) as File[];
     const limitedFiles = files.slice(0, 5);
 
-    // Optional: enforce server-side max file size (10MB)
-    const tooLarge = limitedFiles.find((f) => f.size > 10 * 1024 * 1024);
-    if (tooLarge) {
+    // Server-side size check (max 10MB/file)
+    if (limitedFiles.find((f) => f.size > 10 * 1024 * 1024)) {
       return NextResponse.json(
         { error: "File too large. Max 10MB per file." },
         { status: 400 }
       );
     }
 
-    const {
-      databases,
-      storage,
-      // account, users, client
-    } = await createAdminClient();
-
+    const { databases, storage } = await createAdminClient();
     const DB_ID = requiredEnv("APPWRITE_DB_ID");
     const INCIDENTS_COLLECTION_ID = requiredEnv(
       "APPWRITE_INCIDENTS_COLLECTION_ID"
     );
     const MEDIA_BUCKET_ID = requiredEnv("APPWRITE_MEDIA_BUCKET_ID");
 
-    const cookieStore = await cookies();
-    const session = cookieStore.get("session")?.value;
-
+    // Check user session
+    const session = (await cookies()).get("session")?.value;
     if (!session) {
       return NextResponse.json(
-        { error: "Unauthorized - No session found" },
+        { error: "Unauthorized - No session" },
         { status: 401 }
       );
     }
@@ -72,93 +68,64 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
-
     const userId = user.$id;
 
-    // Create the document first, to get a canonical reference ID
+    // Create incident doc
     const incidentId = ID.unique();
-    const doc = await databases.createDocument(
+    await databases.createDocument(
       DB_ID,
       INCIDENTS_COLLECTION_ID,
       incidentId,
       {
+        category: parsed.data.category,
         type: parsed.data.type,
         description: parsed.data.description,
-        address: parsed.data.address,
+        notes: parsed.data.notes || "",
         urgency: parsed.data.urgency,
         lat: parsed.data.lat,
         lng: parsed.data.lng,
         userId,
-        status: "open",
-        // mediaIds: [] as string[],
+        status: "pending",
+        mediaIds: [],
       },
       [
-        // Permissions: allow the owner to read/update; admins have full access.
-        // Adjust per your needs (e.g., Role.any() to allow public read).
-        ...(userId
-          ? [
-              Permission.read(Role.user(userId)),
-              Permission.update(Role.user(userId)),
-            ]
-          : []),
-        Permission.read(Role.team("admins")), // Example: admins team
+        Permission.read(Role.user(userId)),
+        Permission.update(Role.user(userId)),
+        Permission.read(Role.team("admins")),
         Permission.update(Role.team("admins")),
         Permission.delete(Role.team("admins")),
       ]
     );
 
-    // Upload each file to Storage and collect IDs
-    const uploadedIds: string[] = [];
-    for (const f of limitedFiles) {
-      const buffer = Buffer.from(await f.arrayBuffer());
-      const inputFile = InputFile.fromBuffer(buffer, f.name);
-      const upload = await storage.createFile(
-        MEDIA_BUCKET_ID,
-        ID.unique(),
-        inputFile,
-        [
-          // Make files readable by owner and admins; tweak as needed
-          ...(userId ? [Permission.read(Role.user(userId))] : []),
-          Permission.read(Role.team("admins")),
-          Permission.update(Role.team("admins")),
-          Permission.delete(Role.team("admins")),
-        ]
-      );
-      uploadedIds.push(upload.$id);
-    }
+    // Upload media if provided
+    if (limitedFiles.length) {
+      const uploadedIds: string[] = [];
+      for (const f of limitedFiles) {
+        const buffer = Buffer.from(await f.arrayBuffer());
+        const inputFile = InputFile.fromBuffer(buffer, f.name);
+        const upload = await storage.createFile(
+          MEDIA_BUCKET_ID,
+          ID.unique(),
+          inputFile,
+          [
+            Permission.read(Role.user(userId)),
+            Permission.read(Role.team("admins")),
+            Permission.update(Role.team("admins")),
+            Permission.delete(Role.team("admins")),
+          ]
+        );
+        uploadedIds.push(upload.$id);
+      }
 
-    // Update the incident with uploaded file IDs
-    if (uploadedIds.length) {
+      // Update document with media IDs
       await databases.updateDocument(
         DB_ID,
         INCIDENTS_COLLECTION_ID,
         incidentId,
-        {
-          type: parsed.data.type,
-          description: parsed.data.description,
-          address: parsed.data.address,
-          urgency: parsed.data.urgency,
-          lat: parsed.data.lat,
-          lng: parsed.data.lng,
-          userId,
-          status: "open",
-          mediaIds: uploadedIds,
-        },
-        [
-          ...(userId
-            ? [
-                Permission.read(Role.user(userId)),
-                Permission.update(Role.user(userId)),
-              ]
-            : []),
-          Permission.read(Role.team("admins")),
-          Permission.update(Role.team("admins")),
-          Permission.delete(Role.team("admins")),
-        ]
+        { mediaIds: uploadedIds }
       );
     }
 
-    console.log("See db document:", doc);
     return NextResponse.json({ id: incidentId });
   } catch (e: unknown) {
     console.error("POST /api/incidents error:", e);
@@ -169,7 +136,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/incidents
 export async function GET() {
   try {
     const { databases } = await createAdminClient();
@@ -177,6 +143,7 @@ export async function GET() {
     const INCIDENTS_COLLECTION_ID = requiredEnv(
       "APPWRITE_INCIDENTS_COLLECTION_ID"
     );
+
     const docs = await databases.listDocuments(DB_ID, INCIDENTS_COLLECTION_ID);
     const safe = incidentDocsSchema.parse(docs.documents);
     return NextResponse.json(safe);
