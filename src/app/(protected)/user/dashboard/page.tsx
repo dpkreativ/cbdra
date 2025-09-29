@@ -1,3 +1,48 @@
+import { getUser } from "@/actions/auth";
+import IncidentCard from "@/components/dashboard/incident-card";
+import { Button } from "@/components/ui/button";
+import axiosInstance from "@/lib/axiosInstance";
+import { incidentDocsSchema } from "@/schemas/incident";
+
 export default async function UserDashboardPage() {
-  return <main>User Dashboard Page</main>;
+  const user = await getUser();
+
+  const { data } = await axiosInstance({
+    method: "GET",
+    url: "/api/incidents",
+  });
+
+  const incidents = incidentDocsSchema.parse(data);
+
+  return (
+    <main className="p-5 space-y-5">
+      <section className="flex flex-col gap-5">
+        {/* Welcome message */}
+        <p>Welcome back, {user?.name}!</p>
+
+        {/* Quick actions */}
+        <h2 className="text-xl font-semibold">Quick Actions</h2>
+        <div className="grid md:grid-cols-2 gap-5">
+          <Button className="py-10">Report an Incident</Button>
+          <Button className="py-10">My Reports</Button>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <h2 className="text-xl font-semibold">
+          Here's what's happening in your community
+        </h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {incidents.map((incident) => (
+            <IncidentCard
+              key={incident.$id}
+              description={incident.description}
+              type={incident.type}
+              urgency={incident.urgency}
+            />
+          ))}
+        </div>
+      </section>
+    </main>
+  );
 }

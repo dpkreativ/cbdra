@@ -31,7 +31,7 @@ export async function login(options: AuthOptions, formData: FormData) {
     path: "/",
   });
 
-  redirect(options.redirectTo || "/dashboard");
+  redirect(options.redirectTo || "/user/dashboard");
 }
 
 /**
@@ -73,7 +73,7 @@ export async function signup(options: AuthOptions, formData: FormData) {
     path: "/",
   });
 
-  redirect(options.redirectTo || "/dashboard");
+  redirect(options.redirectTo || "/user/dashboard");
 }
 
 /**
