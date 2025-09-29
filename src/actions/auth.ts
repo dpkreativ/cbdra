@@ -9,32 +9,59 @@ interface AuthOptions {
   redirectTo?: string;
 }
 
+type AuthResult =
+  | { success: true; redirectTo: string }
+  | { success: false; message: string };
+
+// Define allowed roles
+const ALLOWED_ROLES = ["admin", "community", "volunteer"] as const;
+type UserRole = (typeof ALLOWED_ROLES)[number];
+
+function getRedirectPath(role: UserRole, custom?: string) {
+  if (custom) return custom;
+  switch (role) {
+    case "admin":
+      return "/admin/dashboard";
+    case "volunteer":
+      return "/volunteer/dashboard";
+    case "community":
+    default:
+      return "/user/dashboard";
+  }
+}
+
 /**
  * Login with email/password.
- * Creates a user session, stores it in a secure cookie, and redirects to /dashboard.
+ * Reads role from prefs, creates a session, sets cookie, and redirects accordingly.
  */
-export async function login(options: AuthOptions, formData: FormData) {
-  const email = formData.get("email") ? String(formData.get("email")) : "";
-  const password = formData.get("password")
-    ? String(formData.get("password"))
-    : "";
+export async function login(
+  options: AuthOptions,
+  formData: FormData
+): Promise<AuthResult> {
+  const email = String(formData.get("email") || "");
+  const password = String(formData.get("password") || "");
 
   try {
     const { account } = await createAdminClient();
     const session = await account.createEmailPasswordSession(email, password);
 
+    // Store session in cookie
     const cookieStore = await cookies();
     cookieStore.set("session", session.secret, {
       httpOnly: true,
       sameSite: "strict",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       expires: new Date(session.expire),
       path: "/",
     });
 
+    // Fetch user to get role
+    const user = await account.get();
+    const role = (user.prefs.role as UserRole) || "community";
+
     return {
       success: true,
-      redirectTo: options.redirectTo || "/user/dashboard",
+      redirectTo: getRedirectPath(role, options.redirectTo),
     };
   } catch (err: unknown) {
     const error = err as Error;
@@ -44,18 +71,25 @@ export async function login(options: AuthOptions, formData: FormData) {
 
 /**
  * Signup with name, email, password, and role.
- * Creates a new user, sets their role in preferences, creates a session, sets cookie, and redirects.
+ * Creates user, sets role, creates session, sets cookie, and redirects accordingly.
  */
-export async function signup(options: AuthOptions, formData: FormData) {
+export async function signup(
+  options: AuthOptions,
+  formData: FormData
+): Promise<AuthResult> {
   const name = String(formData.get("name") || "");
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
-  const role = String(formData.get("role") || "user");
+  const role = String(formData.get("role") || "community") as UserRole;
 
   try {
+    if (!ALLOWED_ROLES.includes(role)) {
+      return { success: false, message: "Invalid role selected" };
+    }
+
     const { users, account } = await createAdminClient();
 
-    // 1) Create the user
+    // Create user
     const user = await users.create(
       ID.unique(),
       email,
@@ -64,25 +98,25 @@ export async function signup(options: AuthOptions, formData: FormData) {
       name || undefined
     );
 
-    // 2) Store role in preferences
+    // Store role in preferences
     await users.updatePrefs(user.$id, { role });
 
-    // 3) Create session
+    // Create session
     const session = await account.createEmailPasswordSession(email, password);
 
-    // 4) Store session in cookie
+    // Store session in cookie
     const cookieStore = await cookies();
     cookieStore.set("session", session.secret, {
       httpOnly: true,
       sameSite: "strict",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       expires: new Date(session.expire),
       path: "/",
     });
 
     return {
       success: true,
-      redirectTo: options.redirectTo || "/user/dashboard",
+      redirectTo: getRedirectPath(role, options.redirectTo),
     };
   } catch (err: unknown) {
     const error = err as Error;
@@ -106,7 +140,7 @@ export async function signout() {
 }
 
 /**
- * Get the current user's session from the cookie
+ * Get the current logged-in user, including role
  */
 export async function getUser() {
   const cookieStore = await cookies();
@@ -118,7 +152,10 @@ export async function getUser() {
 
   try {
     const user = await account.get();
-    return user;
+    return {
+      ...user,
+      role: (user.prefs.role as UserRole) || "community",
+    };
   } catch (error) {
     console.error("Failed to get user:", error);
     return null;
