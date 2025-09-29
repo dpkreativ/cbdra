@@ -15,14 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useFormStatus } from "react-dom";
+import { login } from "@/actions/auth";
 import { loginSchema } from "@/schemas/auth";
+import { useRouter } from "next/navigation";
 
-export function LoginForm({
-  action,
-}: {
-  action: (formData: FormData) => Promise<void>;
-}) {
+export function LoginForm() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     mode: "onBlur",
@@ -33,22 +30,36 @@ export function LoginForm({
     },
   });
 
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const emailFieldId = useMemo(() => "email-input", []);
   const passwordFieldId = useMemo(() => "password-input", []);
-  const [showPassword, setShowPassword] = useState(false);
 
-  async function handleClientValidation(e: React.FormEvent<HTMLFormElement>) {
-    const ok = await form.trigger();
-    if (!ok) e.preventDefault();
+  async function handleSubmit(values: z.infer<typeof loginSchema>) {
+    setError(null);
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("email", values.email);
+    formData.append("password", values.password);
+
+    const result = await login({ redirectTo: "/user/dashboard" }, formData);
+
+    setLoading(false);
+
+    if (result.success) {
+      router.push(result.redirectTo ?? "/");
+    } else {
+      setError(result.message ?? "Something went wrong, please try again.");
+    }
   }
 
   return (
     <Form {...form}>
-      <form
-        action={action}
-        onSubmit={handleClientValidation}
-        className="space-y-5"
-      >
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
         <FormField
           control={form.control}
           name="email"
@@ -61,14 +72,10 @@ export function LoginForm({
                   type="email"
                   autoComplete="email"
                   placeholder="johndoe@mail.com"
-                  aria-invalid={!!form.formState.errors.email}
-                  aria-describedby={
-                    form.formState.errors.email ? "email-error" : undefined
-                  }
                   {...field}
                 />
               </FormControl>
-              <FormMessage id="email-error" />
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -84,12 +91,6 @@ export function LoginForm({
                     id={passwordFieldId}
                     type={showPassword ? "text" : "password"}
                     autoComplete="off"
-                    aria-invalid={!!form.formState.errors.password}
-                    aria-describedby={
-                      form.formState.errors.password
-                        ? "password-error"
-                        : undefined
-                    }
                     {...field}
                   />
                   <Button
@@ -97,7 +98,7 @@ export function LoginForm({
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute hover:bg-transparent right-2 top-1/2 -translate-y-1/2"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -112,23 +113,16 @@ export function LoginForm({
           )}
         />
 
-        <SubmitButton disabledByClient={!form.formState.isValid} />
+        {error && <p className="text-red-500">{error}</p>}
+
+        <Button
+          type="submit"
+          disabled={!form.formState.isValid || loading}
+          className="w-full"
+        >
+          {loading ? "Signing in..." : "Login"}
+        </Button>
       </form>
     </Form>
-  );
-}
-
-function SubmitButton({ disabledByClient }: { disabledByClient: boolean }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button
-      type="submit"
-      disabled={pending || disabledByClient}
-      aria-busy={pending}
-      className="w-full"
-    >
-      {pending ? "Signing in..." : "Login"}
-    </Button>
   );
 }

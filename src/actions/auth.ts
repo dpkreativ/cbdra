@@ -19,19 +19,27 @@ export async function login(options: AuthOptions, formData: FormData) {
     ? String(formData.get("password"))
     : "";
 
-  const { account } = await createAdminClient();
-  const session = await account.createEmailPasswordSession(email, password);
+  try {
+    const { account } = await createAdminClient();
+    const session = await account.createEmailPasswordSession(email, password);
 
-  const cookieStore = await cookies();
-  cookieStore.set("session", session.secret, {
-    httpOnly: true,
-    sameSite: "strict",
-    secure: true,
-    expires: new Date(session.expire),
-    path: "/",
-  });
+    const cookieStore = await cookies();
+    cookieStore.set("session", session.secret, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+      expires: new Date(session.expire),
+      path: "/",
+    });
 
-  redirect(options.redirectTo || "/user/dashboard");
+    return {
+      success: true,
+      redirectTo: options.redirectTo || "/user/dashboard",
+    };
+  } catch (err: unknown) {
+    const error = err as Error;
+    return { success: false, message: error?.message || "Login failed" };
+  }
 }
 
 /**
@@ -39,41 +47,47 @@ export async function login(options: AuthOptions, formData: FormData) {
  * Creates a new user, sets their role in preferences, creates a session, sets cookie, and redirects.
  */
 export async function signup(options: AuthOptions, formData: FormData) {
-  const name = formData.get("name") ? String(formData.get("name")) : "";
-  const email = formData.get("email") ? String(formData.get("email")) : "";
-  const password = formData.get("password")
-    ? String(formData.get("password"))
-    : "";
-  const role = formData.get("role") ? String(formData.get("role")) : "user";
+  const name = String(formData.get("name") || "");
+  const email = String(formData.get("email") || "");
+  const password = String(formData.get("password") || "");
+  const role = String(formData.get("role") || "user");
 
-  const { users, account } = await createAdminClient();
+  try {
+    const { users, account } = await createAdminClient();
 
-  // 1) Create the user (server-side)
-  const user = await users.create(
-    ID.unique(),
-    email,
-    undefined,
-    password,
-    name || undefined
-  );
+    // 1) Create the user
+    const user = await users.create(
+      ID.unique(),
+      email,
+      undefined,
+      password,
+      name || undefined
+    );
 
-  // 2) Store role in user preferences (optional but useful)
-  await users.updatePrefs(user.$id, { role });
+    // 2) Store role in preferences
+    await users.updatePrefs(user.$id, { role });
 
-  // 3) Create session for the newly created user
-  const session = await account.createEmailPasswordSession(email, password);
+    // 3) Create session
+    const session = await account.createEmailPasswordSession(email, password);
 
-  // 4) Persist session in secure cookie
-  const cookieStore = await cookies();
-  cookieStore.set("session", session.secret, {
-    httpOnly: true,
-    sameSite: "strict",
-    secure: true,
-    expires: new Date(session.expire),
-    path: "/",
-  });
+    // 4) Store session in cookie
+    const cookieStore = await cookies();
+    cookieStore.set("session", session.secret, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+      expires: new Date(session.expire),
+      path: "/",
+    });
 
-  redirect(options.redirectTo || "/user/dashboard");
+    return {
+      success: true,
+      redirectTo: options.redirectTo || "/user/dashboard",
+    };
+  } catch (err: unknown) {
+    const error = err as Error;
+    return { success: false, message: error?.message || "Signup failed" };
+  }
 }
 
 /**
