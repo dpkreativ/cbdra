@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
-import { getUser } from "@/actions/auth";
 import { AdminHeader } from "@/components/layout/header";
 import { AdminSidebar } from "@/components/layout/sidebar";
 
@@ -19,8 +18,6 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUser();
-  console.log(user);
   return (
     <html>
       <body
