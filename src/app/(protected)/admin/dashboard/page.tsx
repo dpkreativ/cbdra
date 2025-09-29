@@ -1,8 +1,8 @@
-import axiosInstance from "@/lib/axiosInstance";
 import IncidentCard from "@/components/dashboard/incident-card";
+import axiosInstance from "@/lib/axiosInstance";
 import { incidentDocsSchema } from "@/schemas/incident";
 
-export default async function DashboardPage() {
+export default async function AdminDashboardPage() {
   const { data } = await axiosInstance({
     method: "GET",
     url: "/api/incidents",

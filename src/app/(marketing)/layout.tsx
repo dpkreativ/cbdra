@@ -9,6 +9,7 @@ import { getUser } from "@/actions/auth";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import mascotWhite from "@/assets/images/mascot-white.svg";
+import { Icon } from "@/components/ui/icon";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,10 +50,10 @@ export default async function RootLayout({
               <Link href="/">Home</Link>
               <Link href="/#how-it-works">How it works</Link>
               <Link href="/#quick-stats">Quick stats</Link>
-              <Link href="/get-help">
+              <Link href="/login">
                 <Button size="lg">
-                  <Image src={mascotWhite} alt="Mascot" className="w-3" />
-                  Get {user ? "help" : "started"}
+                  <Icon icon="material-symbols:login" width="24" height="24" />
+                  Get started
                 </Button>
               </Link>
             </nav>
@@ -72,10 +73,14 @@ export default async function RootLayout({
                   <Link href="/">Home</Link>
                   <Link href="/#how-it-works">How it works</Link>
                   <Link href="/#quick-stats">Quick stats</Link>
-                  <Link href="/get-help">
+                  <Link href="/login">
                     <Button size="lg">
-                      <Image src={mascotWhite} alt="Mascot" className="w-3" />
-                      Get {user ? "help" : "started"}
+                      <Icon
+                        icon="material-symbols:login"
+                        width="24"
+                        height="24"
+                      />
+                      Get started
                     </Button>
                   </Link>
                 </SheetContent>
@@ -102,7 +107,7 @@ export default async function RootLayout({
 
             <div className="grid md:flex gap-10 text-muted-foreground">
               <div className="flex flex-col gap-3">
-                <Link href="/get-help">Get Help</Link>
+                <Link href="/login">Get Help</Link>
                 <Link href="/signup">Join as Volunteer</Link>
               </div>
               <div className="flex flex-col gap-3">

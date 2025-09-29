@@ -1,0 +1,39 @@
+import { UserHeader } from "@/components/layout/header";
+import { getUser, signout } from "@/actions/auth";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Metadata } from "next";
+import "@/app/globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Community Based Disaster Response App",
+  description: "Get the help you need during emergencies.",
+};
+
+export default async function UserLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const user = await getUser();
+  console.log(user);
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <UserHeader user={user} signout={signout} />
+        {children}
+      </body>
+    </html>
+  );
+}
