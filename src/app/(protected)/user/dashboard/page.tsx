@@ -8,7 +8,6 @@ import {
   FileText,
   Clock,
   CheckCircle,
-  AlertCircle,
   TrendingUp,
 } from "lucide-react";
 
@@ -32,7 +31,7 @@ export default async function UserDashboardPage() {
             Welcome back, {user?.name?.split(" ")[0]}! 👋
           </h1>
           <p className="text-muted-foreground mt-1">
-            Here's what's happening in your community today
+            Here&apos;s what&apos;s happening in your community today
           </p>
         </div>
         <Link href="/user/get-help">
@@ -151,7 +150,7 @@ export default async function UserDashboardPage() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Here's what's happening in your community today
+            Here&apos;s what&apos;s happening in your community today
           </p>
         </CardContent>
       </Card>

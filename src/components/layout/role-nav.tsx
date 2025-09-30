@@ -12,7 +12,6 @@ import {
   ShieldAlert,
   ClipboardList,
   BarChart3,
-  Building,
   UserCheck,
 } from "lucide-react";
 

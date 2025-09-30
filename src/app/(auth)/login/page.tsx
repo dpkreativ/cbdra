@@ -23,7 +23,7 @@ export default async function Page() {
       {/* Footer */}
       <div className="space-y-4 text-center text-sm">
         <p className="text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             className="text-primary underline font-semibold hover:no-underline"
             href="/signup"
