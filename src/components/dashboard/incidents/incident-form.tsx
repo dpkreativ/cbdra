@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLocation } from "@/context/location-context";
 import { Icon } from "@/components/ui/icon";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
 
 // Type
 type IncidentFormValues = z.infer<typeof incidentCreateSchema>;
@@ -40,6 +41,7 @@ export default function IncidentForm() {
   const { lat, lng } = useLocation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [location, setLocation] = useState<string>("");
   const router = useRouter();
 
   const form = useForm<IncidentFormValues>({
@@ -98,6 +100,8 @@ export default function IncidentForm() {
           }
         }
       }
+
+      values.description = `${location} - ${values.description}`;
       console.log("Form Data:", values);
 
       const fd = new FormData();
@@ -138,6 +142,19 @@ export default function IncidentForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
         {/* Row: Category, Type, Urgency */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {/* Location */}
+          <FormField
+            name="location"
+            render={() => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <Input onChange={(e) => setLocation(e.target.value)} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {/* Category */}
           <FormField
             control={form.control}
