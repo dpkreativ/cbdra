@@ -1,3 +1,4 @@
+// src/components/auth/login-form.tsx
 "use client";
 
 import {
@@ -14,10 +15,11 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { login } from "@/actions/auth";
 import { loginSchema } from "@/schemas/auth";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function LoginForm() {
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -46,20 +48,28 @@ export function LoginForm() {
     formData.append("email", values.email);
     formData.append("password", values.password);
 
-    const result = await login({}, formData); // Let backend decide redirect
+    const result = await login({}, formData);
 
     setLoading(false);
 
     if (result.success) {
-      router.push(result.redirectTo); // Always defined if success = true
+      router.push(result.redirectTo);
     } else {
-      setError(result.message ?? "Something went wrong, please try again.");
+      setError(result.message);
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Email */}
         <FormField
           control={form.control}
@@ -94,7 +104,7 @@ export function LoginForm() {
                   <Input
                     id={passwordFieldId}
                     type={showPassword ? "text" : "password"}
-                    autoComplete="off"
+                    autoComplete="current-password"
                     disabled={loading}
                     {...field}
                   />
@@ -107,6 +117,7 @@ export function LoginForm() {
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -120,9 +131,6 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-
-        {/* Error */}
-        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         {/* Submit */}
         <Button
