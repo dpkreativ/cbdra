@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Mapbox CSS */
+@import "mapbox-gl/dist/mapbox-gl.css";
+@import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -156,4 +160,35 @@
   html {
     @apply scroll-smooth;
   }
+}
+
+/* Custom Mapbox geocoder styles */
+.mapboxgl-ctrl-geocoder {
+  max-width: 90% !important;
+  width: 100% !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mapboxgl-ctrl-geocoder input {
+  font-size: 14px !important;
+  padding: 8px 12px !important;
+}
+
+@media (max-width: 640px) {
+  .mapboxgl-ctrl-geocoder {
+    max-width: 85% !important;
+    font-size: 13px !important;
+  }
+}
+
+/* Mapbox marker customization */
+.custom-marker {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+.mapboxgl-popup-content {
+  padding: 10px 15px !important;
+  border-radius: 8px !important;
 }

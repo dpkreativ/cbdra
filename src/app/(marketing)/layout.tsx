@@ -33,7 +33,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <MarketingHeader user={user} signout={() => {}} />
+        <MarketingHeader user={user} />
         <main>{children}</main>
         <footer className="text-center">
           <div className="md:text-left p-5 py-20 w-full max-w-[1200px] mx-auto grid justify-center md:flex gap-20 md:justify-between items-center">

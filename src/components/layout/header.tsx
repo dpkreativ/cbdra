@@ -88,13 +88,7 @@ export function UserHeader({
   );
 }
 
-export function MarketingHeader({
-  user,
-  signout,
-}: {
-  user?: Models.User | null;
-  signout: () => void;
-}) {
+export function MarketingHeader({ user }: { user?: Models.User | null }) {
   return (
     <header className="fixed w-full top-0 z-50 bg-transparent backdrop-blur-2xl">
       <div className="p-5 w-full max-w-[1200px] mx-auto flex items-center justify-between gap-5">
