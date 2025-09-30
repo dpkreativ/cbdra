@@ -12,6 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 
 export function AdminHeader() {
   return <header></header>;
@@ -80,6 +83,62 @@ export function UserHeader({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+    </header>
+  );
+}
+
+export function MarketingHeader({ user }: { user?: Models.User | null }) {
+  return (
+    <header className="fixed w-full top-0 z-50 bg-transparent backdrop-blur-2xl">
+      <div className="p-5 w-full max-w-[1200px] mx-auto flex items-center justify-between gap-5">
+        <Link href="/" className="flex items-center gap-2">
+          <Image src={mascot} alt="Mascot" className="w-5" />
+          <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl">CBDRA</h1>
+        </Link>
+        {/* Desktop nav */}
+        <nav className="hidden md:flex gap-10 items-center font-semibold">
+          <Link href="/">Home</Link>
+          <Link href="/#how-it-works">How it works</Link>
+          <Link href="/#quick-stats">Quick stats</Link>
+          {user ? (
+            <Link href="/user/dashboard">
+              <Button size="lg">Go to Dashboard</Button>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <Button size="lg">Get started</Button>
+            </Link>
+          )}
+        </nav>
+
+        {/* Mobile nav */}
+        <nav className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="w-72 sm:w-80 px-5 py-10 gap-5 font-semibold"
+            >
+              <Link href="/">Home</Link>
+              <Link href="/#how-it-works">How it works</Link>
+              <Link href="/#quick-stats">Quick stats</Link>
+              {user ? (
+                <Link href="/user/dashboard">
+                  <Button size="lg">Go to Dashboard</Button>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <Button size="lg">Get Started</Button>
+                </Link>
+              )}
+            </SheetContent>
+          </Sheet>
+        </nav>
       </div>
     </header>
   );

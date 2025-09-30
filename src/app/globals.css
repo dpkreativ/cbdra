@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Mapbox CSS */
+@import "mapbox-gl/dist/mapbox-gl.css";
+@import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -158,30 +162,33 @@
   }
 }
 
-/* Prevent map search input from overflowing on mobile */
-.leaflet-control-geosearch {
-  max-width: 90% !important; /* shrink on small screens */
-  width: auto !important;
-  left: 50% !important;
-  transform: translateX(-50%); /* center it horizontally */
+/* Custom Mapbox geocoder styles */
+.mapboxgl-ctrl-geocoder {
+  max-width: 90% !important;
+  width: 100% !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
-.leaflet-control-geosearch .glass {
-  width: 100% !important; /* make input respect container */
-  max-width: 100% !important;
-  box-sizing: border-box;
+.mapboxgl-ctrl-geocoder input {
+  font-size: 14px !important;
+  padding: 8px 12px !important;
 }
 
 @media (max-width: 640px) {
-  .leaflet-control-geosearch {
+  .mapboxgl-ctrl-geocoder {
     max-width: 85% !important;
-    font-size: 14px; /* smaller text on mobile */
+    font-size: 13px !important;
   }
 }
 
-/* Make all input/textarea/select placeholders use muted-foreground */
-input::placeholder,
-textarea::placeholder,
-select::placeholder {
-  color: var(--muted-foreground) / 50%;
+/* Mapbox marker customization */
+.custom-marker {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+.mapboxgl-popup-content {
+  padding: 10px 15px !important;
+  border-radius: 8px !important;
 }
