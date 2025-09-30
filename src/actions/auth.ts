@@ -4,6 +4,7 @@ import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ID } from "node-appwrite";
+import { getUserFriendlyErrorMessage } from "@/lib/error-messages";
 
 interface AuthOptions {
   redirectTo?: string;
@@ -14,7 +15,13 @@ type AuthResult =
   | { success: false; message: string };
 
 // Define allowed roles
-const ALLOWED_ROLES = ["admin", "community", "volunteer"] as const;
+const ALLOWED_ROLES = [
+  "admin",
+  "community",
+  "volunteer",
+  "ngo",
+  "gov",
+] as const;
 type UserRole = (typeof ALLOWED_ROLES)[number];
 
 function getRedirectPath(role: UserRole, custom?: string) {
@@ -38,8 +45,13 @@ export async function login(
   options: AuthOptions,
   formData: FormData
 ): Promise<AuthResult> {
-  const email = String(formData.get("email") || "");
+  const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
+
+  // Basic validation
+  if (!email || !password) {
+    return { success: false, message: "Please enter both email and password." };
+  }
 
   try {
     const { account } = await createAdminClient();
@@ -64,8 +76,11 @@ export async function login(
       redirectTo: getRedirectPath(role, options.redirectTo),
     };
   } catch (err: unknown) {
-    const error = err as Error;
-    return { success: false, message: error?.message || "Login failed" };
+    console.error("Login error:", err);
+    return {
+      success: false,
+      message: getUserFriendlyErrorMessage(err),
+    };
   }
 }
 
@@ -77,14 +92,29 @@ export async function signup(
   options: AuthOptions,
   formData: FormData
 ): Promise<AuthResult> {
-  const name = String(formData.get("name") || "");
-  const email = String(formData.get("email") || "");
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
   const role = String(formData.get("role") || "community") as UserRole;
 
+  // Basic validation
+  if (!name || !email || !password) {
+    return { success: false, message: "Please fill in all required fields." };
+  }
+
+  if (password.length < 6) {
+    return {
+      success: false,
+      message: "Password must be at least 6 characters long.",
+    };
+  }
+
   try {
     if (!ALLOWED_ROLES.includes(role)) {
-      return { success: false, message: "Invalid role selected" };
+      return {
+        success: false,
+        message: "Invalid role selected. Please try again.",
+      };
     }
 
     const { users, account } = await createAdminClient();
@@ -119,8 +149,11 @@ export async function signup(
       redirectTo: getRedirectPath(role, options.redirectTo),
     };
   } catch (err: unknown) {
-    const error = err as Error;
-    return { success: false, message: error?.message || "Signup failed" };
+    console.error("Signup error:", err);
+    return {
+      success: false,
+      message: getUserFriendlyErrorMessage(err),
+    };
   }
 }
 
@@ -128,14 +161,23 @@ export async function signup(
  * Signout by deleting the current session (if any), clearing the cookie, and redirecting to /login.
  */
 export async function signout() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("session");
-  if (!session?.value) return;
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get("session");
 
-  const { account } = await createSessionClient(session.value);
+    if (session?.value) {
+      const { account } = await createSessionClient(session.value);
+      await account.deleteSession("current");
+    }
 
-  await account.deleteSession("current");
-  cookieStore.delete("session");
+    cookieStore.delete("session");
+  } catch (error) {
+    console.error("Signout error:", error);
+    // Still clear the cookie even if session deletion fails
+    const cookieStore = await cookies();
+    cookieStore.delete("session");
+  }
+
   redirect("/login");
 }
 
@@ -148,9 +190,8 @@ export async function getUser() {
 
   if (!session?.value) return null;
 
-  const { account } = await createSessionClient(session.value);
-
   try {
+    const { account } = await createSessionClient(session.value);
     const user = await account.get();
     return {
       ...user,

@@ -21,10 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMemo, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { signupSchema } from "@/schemas/auth";
 import { signup } from "@/actions/auth";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function SignupForm() {
   const form = useForm<z.infer<typeof signupSchema>>({
@@ -32,7 +33,7 @@ export function SignupForm() {
     mode: "onBlur",
     reValidateMode: "onChange",
     defaultValues: {
-      role: "user",
+      role: "community",
       email: "",
       name: "",
       password: "",
@@ -71,13 +72,21 @@ export function SignupForm() {
     if (result.success) {
       router.push(result.redirectTo ?? "/");
     } else {
-      setError(result.message ?? "Something went wrong, please try again.");
+      setError(result.message);
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Name */}
         <FormField
           control={form.control}
@@ -86,7 +95,12 @@ export function SignupForm() {
             <FormItem>
               <FormLabel htmlFor={nameFieldId}>Name</FormLabel>
               <FormControl>
-                <Input id={nameFieldId} placeholder="John Doe" {...field} />
+                <Input
+                  id={nameFieldId}
+                  placeholder="John Doe"
+                  disabled={loading}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,6 +119,8 @@ export function SignupForm() {
                   id={emailFieldId}
                   type="email"
                   autoComplete="email"
+                  placeholder="johndoe@mail.com"
+                  disabled={loading}
                   {...field}
                 />
               </FormControl>
@@ -125,7 +141,8 @@ export function SignupForm() {
                   <Input
                     id={passwordFieldId}
                     type={showPassword ? "text" : "password"}
-                    autoComplete="off"
+                    autoComplete="new-password"
+                    disabled={loading}
                     {...field}
                   />
                   <Button
@@ -134,6 +151,7 @@ export function SignupForm() {
                     size="icon"
                     onClick={() => setShowPassword((s) => !s)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -162,7 +180,8 @@ export function SignupForm() {
                   <Input
                     id={confirmPasswordFieldId}
                     type={showConfirm ? "text" : "password"}
-                    autoComplete="off"
+                    autoComplete="new-password"
+                    disabled={loading}
                     {...field}
                   />
                   <Button
@@ -171,6 +190,7 @@ export function SignupForm() {
                     size="icon"
                     onClick={() => setShowConfirm((s) => !s)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
+                    disabled={loading}
                   >
                     {showConfirm ? (
                       <EyeOff className="h-4 w-4" />
@@ -196,6 +216,7 @@ export function SignupForm() {
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  disabled={loading}
                 >
                   <SelectTrigger id={roleFieldId} className="w-full">
                     <SelectValue placeholder="Select a role" />
@@ -205,6 +226,7 @@ export function SignupForm() {
                     <SelectItem value="volunteer">Volunteer</SelectItem>
                     <SelectItem value="ngo">NGO</SelectItem>
                     <SelectItem value="gov">Govt. Agency</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -212,8 +234,6 @@ export function SignupForm() {
             </FormItem>
           )}
         />
-
-        {error && <p className="text-red-500">{error}</p>}
 
         <Button
           type="submit"
