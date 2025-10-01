@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import type { IncidentData } from "@/schemas/incidents";
 
 const TYPE_ICONS: Record<string, string> = {
   water: "carbon:flood",
@@ -41,25 +42,17 @@ function UrgencyBadge({ level }: { level: string }) {
   );
 }
 
-export default function IncidentCard({
-  type,
-  description,
-  urgency,
-}: {
-  type: string;
-  description: string;
-  urgency: string;
-}) {
+export default function IncidentCard({ incident }: { incident: IncidentData }) {
   return (
     <Card className="cursor-pointer">
       <CardHeader>
         <CardTitle className="flex gap-2 justify-between">
-          <TypeIcon type={type} />
-          <UrgencyBadge level={urgency} />
+          <TypeIcon type={incident.type} />
+          <UrgencyBadge level={incident.urgency} />
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="line-clamp-2">{description}</p>
+        <p className="line-clamp-2">{incident.description}</p>
       </CardContent>
     </Card>
   );

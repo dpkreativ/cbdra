@@ -1,26 +1,12 @@
-// src/app/(protected)/user/dashboard/page.tsx
 import { getUser } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import {
-  Megaphone,
-  FileText,
-  Clock,
-  CheckCircle,
-  TrendingUp,
-} from "lucide-react";
+import { Megaphone, FileText } from "lucide-react";
+import { IncidentsStats } from "@/components/dashboard/incidents/user-view";
 
 export default async function UserDashboardPage() {
   const user = await getUser();
-
-  // TODO: Fetch user's incident stats
-  const stats = {
-    total: 12,
-    pending: 3,
-    resolved: 9,
-    avgResponseTime: "18 min",
-  };
 
   return (
     <main className="p-5 md:p-8 space-y-8 max-w-7xl mx-auto">
@@ -40,72 +26,6 @@ export default async function UserDashboardPage() {
             Report New Incident
           </Button>
         </Link>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Reports
-            </CardTitle>
-            <FileText className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              <TrendingUp className="w-3 h-3 inline mr-1" />
-              +2 from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending
-            </CardTitle>
-            <Clock className="w-4 h-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600">
-              {stats.pending}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Being reviewed</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Resolved
-            </CardTitle>
-            <CheckCircle className="w-4 h-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">
-              {stats.resolved}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Successfully handled
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg Response
-            </CardTitle>
-            <TrendingUp className="w-4 h-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.avgResponseTime}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Community response time
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Quick Actions */}
@@ -143,17 +63,8 @@ export default async function UserDashboardPage() {
         </Card>
       </div>
 
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity in Your Area</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Here&apos;s what&apos;s happening in your community today
-          </p>
-        </CardContent>
-      </Card>
+      {/* Stats and Activity */}
+      <IncidentsStats />
     </main>
   );
 }
