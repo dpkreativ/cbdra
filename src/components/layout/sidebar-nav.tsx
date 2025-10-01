@@ -7,7 +7,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
@@ -26,11 +25,11 @@ function SidebarNav({ links, title }: SidebarNavProps) {
 
   return (
     <Sidebar>
-      <SidebarContent>
+      <SidebarContent className="py-24">
         <SidebarGroup>
-          {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
+          {/* {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>} */}
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-3">
               {links.map((link) => {
                 const active = pathname === link.href;
                 return (
@@ -38,7 +37,7 @@ function SidebarNav({ links, title }: SidebarNavProps) {
                     <SidebarMenuButton asChild isActive={active}>
                       <Link
                         href={link.href}
-                        className={cn(active && "font-semibold")}
+                        className={cn("p-6", active && "font-semibold")}
                       >
                         {link.icon && <span className="mr-2">{link.icon}</span>}
                         {link.label}

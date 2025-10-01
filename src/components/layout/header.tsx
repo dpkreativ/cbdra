@@ -197,7 +197,6 @@ export function MarketingHeader({ user }: { user?: Models.User | null }) {
         <nav className="hidden md:flex gap-10 items-center font-semibold">
           <Link href="/">Home</Link>
           <Link href="/#how-it-works">How it works</Link>
-          <Link href="/#quick-stats">Quick stats</Link>
           {user ? (
             <Link href="/user/dashboard">
               <Button size="lg">Go to Dashboard</Button>
@@ -213,17 +212,13 @@ export function MarketingHeader({ user }: { user?: Models.User | null }) {
         <nav className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" aria-label="Open menu">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Icon icon="mdi:hamburger-menu-back" width="20" height="20" />
               </Button>
             </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="w-72 sm:w-80 px-5 py-10 gap-5 font-semibold"
-            >
+            <SheetContent side="right" className="w-72 sm:w-80 p-12 gap-8">
               <Link href="/">Home</Link>
               <Link href="/#how-it-works">How it works</Link>
-              <Link href="/#quick-stats">Quick stats</Link>
               {user ? (
                 <Link href="/user/dashboard">
                   <Button size="lg">Go to Dashboard</Button>
