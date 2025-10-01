@@ -4,6 +4,8 @@ import { AdminHeader } from "@/components/layout/header";
 import { AdminSidebar } from "@/components/layout/sidebar-nav";
 import { getUser, signout } from "@/actions/auth";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Metadata } from "next";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,6 +16,11 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const metadata: Metadata = {
+  title: "CBDRA - Admin",
+  description: "Get the help you need during emergencies.",
+};
 
 export default async function AdminLayout({
   children,
@@ -27,15 +34,13 @@ export default async function AdminLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SidebarProvider className="flex flex-col h-screen">
-          {/* Fixed header */}
-          <AdminHeader user={user} signout={signout} />
-
-          {/* Fixed sidebar */}
+        <AdminHeader user={user} signout={signout} />
+        <SidebarProvider>
           <AdminSidebar />
-
-          {/* Main content (with left margin to account for sidebar) */}
-          <main className="overflow-y-auto p-6">{children}</main>
+          <main className="overflow-y-auto p-5 md:p-8 space-y-8 w-full">
+            {children}
+          </main>
+          <Toaster />
         </SidebarProvider>
       </body>
     </html>

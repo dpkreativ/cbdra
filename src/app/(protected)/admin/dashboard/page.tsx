@@ -151,9 +151,9 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <main className="p-6 space-y-6 w-full">
+    <>
       {/* Header */}
-      <div>
+      <div className="space-y-4">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground">
           Manage incidents and allocate resources
@@ -421,6 +421,6 @@ export default function AdminDashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </main>
+    </>
   );
 }

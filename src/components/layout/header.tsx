@@ -125,7 +125,7 @@ export function UserHeader({
   signout: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-50 bg-white/50 backdrop-blur-3xl border-b">
+    <header className="sticky w-full top-0 z-50 bg-white/50 backdrop-blur-3xl border-b">
       <div className="p-5 w-full flex items-center justify-between gap-5">
         <Link href="/" className="flex items-center gap-2">
           <Image src={mascot} alt="Mascot" className="w-5" />

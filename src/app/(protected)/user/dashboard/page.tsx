@@ -9,7 +9,7 @@ export default async function UserDashboardPage() {
   const user = await getUser();
 
   return (
-    <main className="p-5 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <>
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -65,6 +65,6 @@ export default async function UserDashboardPage() {
 
       {/* Stats and Activity */}
       <IncidentsStats />
-    </main>
+    </>
   );
 }
