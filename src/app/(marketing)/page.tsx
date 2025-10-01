@@ -19,7 +19,7 @@ export default function Home() {
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 -z-10" />
 
-        <div className="w-full max-w-[1200px] mx-auto grid md:grid-cols-2 content-center">
+        <div className="w-full max-w-[1200px] mx-auto grid md:grid-cols-2 content-center py-16">
           <div className="order-2 md:order-1 p-5 flex flex-col justify-center gap-8 text-center md:text-left">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium w-fit mx-auto md:mx-0">
               <Shield className="w-4 h-4" />
@@ -88,7 +88,7 @@ export default function Home() {
             <Image
               src={illustration}
               alt="CBDRA"
-              className="w-full max-w-2xl mx-auto drop-shadow-2xl"
+              className="w-full max-w-xl mx-auto drop-shadow-2xl"
               priority
             />
           </div>
@@ -99,7 +99,7 @@ export default function Home() {
       <section id="how-it-works" className="p-5 py-20 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
               How It Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -110,14 +110,13 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="relative p-6 bg-background rounded-2xl border shadow-sm hover:shadow-lg transition-all group">
-              <div className="absolute -top-4 left-6 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                1
-              </div>
-              <div className="mt-6 space-y-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Megaphone className="w-6 h-6 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary font-bold text-white rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    1
+                  </div>
+                  <h3 className="text-xl font-semibold">Report Incident</h3>
                 </div>
-                <h3 className="text-xl font-semibold">Report Incident</h3>
                 <p className="text-muted-foreground">
                   Quickly report emergencies with photos, videos, and precise
                   location. Our intuitive form makes it easy.
@@ -126,14 +125,13 @@ export default function Home() {
             </div>
 
             <div className="relative p-6 bg-background rounded-2xl border shadow-sm hover:shadow-lg transition-all group">
-              <div className="absolute -top-4 left-6 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                2
-              </div>
-              <div className="mt-6 space-y-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Siren className="w-6 h-6 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary font-bold text-white rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    2
+                  </div>
+                  <h3 className="text-xl font-semibold">Instant Alert</h3>
                 </div>
-                <h3 className="text-xl font-semibold">Instant Alert</h3>
                 <p className="text-muted-foreground">
                   Nearby volunteers, NGOs, and emergency services receive
                   instant notifications about your incident.
@@ -142,14 +140,13 @@ export default function Home() {
             </div>
 
             <div className="relative p-6 bg-background rounded-2xl border shadow-sm hover:shadow-lg transition-all group">
-              <div className="absolute -top-4 left-6 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                3
-              </div>
-              <div className="mt-6 space-y-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <HeartHandshake className="w-6 h-6 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary font-bold text-white rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    3
+                  </div>
+                  <h3 className="text-xl font-semibold">Get Support</h3>
                 </div>
-                <h3 className="text-xl font-semibold">Get Support</h3>
                 <p className="text-muted-foreground">
                   Community responders arrive quickly. Track their progress in
                   real-time until help arrives.
@@ -164,7 +161,7 @@ export default function Home() {
       <section className="p-5 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
               Why Choose CBDRA?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
