@@ -71,18 +71,21 @@ src/
 ## 🚀 Getting Started
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/cbdra.git
    cd cbdra
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
    Create a `.env.local` file with:
+
    ```env
    NEXT_PUBLIC_APPWRITE_ENDPOINT=your_appwrite_endpoint
    NEXT_PUBLIC_APPWRITE_PROJECT=your_project_id
@@ -114,10 +117,6 @@ This project is licensed under the MIT License.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
----
-
-Built with ❤️ by [Your Name]
 
 ---
 
@@ -834,16 +833,6 @@ https://cbdra.vercel.app
 - ✅ Build functional dashboards with real data
 - ✅ Improve user experience with profiles
 - ⏳ Begin notification system (if time permits)
-
----
-
-## Thank You!
-
-### Questions?
-
-**Project Repository**: [GitHub Link]
-**Live Demo**: [Deployment URL]
-**Contact**: [Your Email]
 
 ---
 
