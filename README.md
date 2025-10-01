@@ -1,53 +1,123 @@
-# Community-Based Disaster Response App
+# CBDRA - Community-Based Disaster Response App
+
+A real-time incident reporting and management system for coordinating disaster response between communities, NGOs, and emergency services.
+
+## 🚀 Features
+
+- **Incident Reporting**: Report emergencies with photos, videos, and precise location
+- **Real-time Updates**: Live incident status tracking
+- **Role-based Access**: Separate interfaces for users and administrators
+- **Responsive Design**: Mobile-first design that works on all devices
+- **Secure Authentication**: Built with Appwrite for secure user management
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 14 (App Router), TypeScript, React
+- **UI**: Shadcn/ui, Tailwind CSS, Framer Motion
+- **Backend**: Appwrite (Auth, Database, Storage)
+- **Maps**: Leaflet/Mapbox integration
+- **Form Handling**: React Hook Form + Zod validation
+- **State Management**: React Context + useState
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── (marketing)/         # Public marketing pages
+│   │   ├── layout.tsx       # Marketing layout
+│   │   └── page.tsx         # Landing page
+│   │
+│   ├── (protected)/         # Protected routes
+│   │   ├── admin/           # Admin dashboard
+│   │   │   ├── dashboard/   # Admin dashboard
+│   │   │   └── layout.tsx   # Admin layout
+│   │   │
+│   │   └── user/            # User dashboard
+│   │       ├── dashboard/   # User dashboard
+│   │       ├── get-help/    # Report incident
+│   │       └── layout.tsx   # User layout
+│   │
+│   ├── api/                 # API routes
+│   │   └── incidents/       # Incident management API
+│   │
+│   ├── auth/                # Auth pages
+│   │   ├── login/          # Login page
+│   │   └── signup/         # Signup page
+│   │
+│   ├── globals.css         # Global styles
+│   └── not-found.tsx       # 404 page
+│
+├── components/
+│   ├── dashboard/          # Dashboard components
+│   ├── layout/             # Layout components
+│   │   ├── footer.tsx      # Footer component
+│   │   ├── header.tsx      # Header component
+│   │   └── sidebar-nav.tsx # Navigation sidebar
+│   └── ui/                 # Shadcn/ui components
+│
+├── schemas/                # Zod schemas
+│   ├── incidents.ts        # Incident validation
+│   └── common.ts           # Common types
+│
+├── actions/                # Server actions
+│   └── auth.ts             # Authentication actions
+│
+└── lib/                    # Utility functions
+    ├── appwrite.ts         # Appwrite client
+    └── utils.ts            # Helper functions
+```
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/cbdra.git
+   cd cbdra
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env.local` file with:
+   ```env
+   NEXT_PUBLIC_APPWRITE_ENDPOINT=your_appwrite_endpoint
+   NEXT_PUBLIC_APPWRITE_PROJECT=your_project_id
+   APPWRITE_API_KEY=your_api_key
+   APPWRITE_DB_ID=your_database_id
+   APPWRITE_INCIDENTS_COLLECTION_ID=your_collection_id
+   APPWRITE_STORAGE_BUCKET_ID=your_bucket_id
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+## 🔒 Authentication
+
+- **User Roles**:
+  - **Regular Users**: Can report incidents and view their status
+  - **Admin**: Can manage all incidents and users
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-## Sprint 1 Updates
-
----
-
-## 1. UML Use Case Diagram
-
-### Actors
-
-- **Community User**: Reports incidents, views incident status
-- **Volunteer**: Responds to incidents, updates status
-- **Admin**: Manages users, oversees all incidents, manages resources
-- **System**: Handles authentication, notifications, data storage
-
-### Use Cases
-
-#### Community User
-
-- Register/Login
-- Report Incident
-- Upload Media (photos/videos)
-- Select Location on Map
-- View Dashboard
-- Track Reported Incidents
-
-#### Volunteer
-
-- View Assigned Incidents
-- Accept/Decline Incident Assignments
-- Update Incident Status
-- Mark Incidents as Resolved
-
-#### Admin
-
-- Manage Users (approve, suspend, delete)
-- Assign Incidents to Volunteers
-- View All Incidents
-- Generate Reports
-- Manage Resources
-
-#### System
-
-- Authenticate Users
-- Validate Incident Data
-- Store Media Files
-- Send Notifications
-- Track Incident Status
+Built with ❤️ by [Your Name]
 
 ---
 
