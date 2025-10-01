@@ -33,6 +33,7 @@ import { useLocation } from "@/context/location-context";
 import { Icon } from "@/components/ui/icon";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner"; // ✅ Sonner for notifications
 
 // Type
 type IncidentFormValues = z.infer<typeof incidentCreateSchema>;
@@ -58,27 +59,29 @@ export default function IncidentForm() {
     },
   });
 
-  // Keep form values in sync with context location
+  const { isSubmitting } = form.formState;
+
+  // Sync with context location
   useEffect(() => {
     form.setValue("lat", lat);
     form.setValue("lng", lng);
   }, [lat, lng, form]);
 
-  // Dynamically compute types based on selected category
+  // Dynamically compute types
   const selectedCategory = form.watch("category") as IncidentCategory;
   const typeOptions = useMemo(() => {
     return INCIDENT_TYPES[selectedCategory] ?? [];
   }, [selectedCategory]);
 
-  // Handle media changes (append instead of replace)
+  // Handle media change
   function handleMediaChange(newFiles: File[]) {
     const existingFiles = form.getValues("media") ?? [];
-    const updatedFiles = [...existingFiles, ...newFiles].slice(0, 5); // enforce max 5
+    const updatedFiles = [...existingFiles, ...newFiles].slice(0, 5);
     form.setValue("media", updatedFiles);
     setPreviews(updatedFiles.map((file) => URL.createObjectURL(file)));
   }
 
-  // Remove a file by index
+  // Remove media
   function handleRemoveMedia(index: number) {
     const files = form.getValues("media") ?? [];
     const updatedFiles = files.filter((_, i) => i !== index);
@@ -88,21 +91,21 @@ export default function IncidentForm() {
 
   async function onSubmit(values: IncidentFormValues) {
     try {
+      // ✅ File validation
       if (values.media && Array.isArray(values.media)) {
         if (values.media.length > 5) {
-          alert("You can upload a maximum of 5 files");
+          toast.error("You can upload a maximum of 5 files");
           return;
         }
         for (const file of values.media) {
           if (file.size > 5 * 1024 * 1024) {
-            alert("Each file must be under 5MB");
+            toast.error("Each file must be under 5MB");
             return;
           }
         }
       }
 
       values.description = `${location} - ${values.description}`;
-      console.log("Form Data:", values);
 
       const fd = new FormData();
       Object.entries(values).forEach(([key, val]) => {
@@ -120,7 +123,7 @@ export default function IncidentForm() {
 
       if (!res.ok) throw new Error("Failed to submit incident");
 
-      alert("✅ Incident submitted successfully!");
+      toast.success("✅ Incident submitted successfully!");
       form.reset({
         category: "other",
         type: "other",
@@ -131,16 +134,16 @@ export default function IncidentForm() {
       });
       setPreviews([]);
       router.push("/user/dashboard");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("❌ Error submitting incident");
+      toast.error(err.message || "❌ Error submitting incident");
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-        {/* Row: Category, Type, Urgency */}
+        {/* Row: Location, Category, Type, Urgency */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {/* Location */}
           <FormField
@@ -155,6 +158,7 @@ export default function IncidentForm() {
               </FormItem>
             )}
           />
+
           {/* Category */}
           <FormField
             control={form.control}
@@ -260,7 +264,7 @@ export default function IncidentForm() {
             <FormItem>
               <FormLabel>Upload Media (max 5 files)</FormLabel>
               <FormControl>
-                <>
+                <div>
                   {/* Hidden file input */}
                   <input
                     ref={fileInputRef}
@@ -324,7 +328,7 @@ export default function IncidentForm() {
                       })}
                     </div>
                   )}
-                </>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -351,8 +355,15 @@ export default function IncidentForm() {
         />
 
         {/* Submit */}
-        <Button type="submit" className="w-full">
-          Submit Incident
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Icon icon="eos-icons:loading" className="mr-2 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Incident"
+          )}
         </Button>
       </form>
     </Form>
