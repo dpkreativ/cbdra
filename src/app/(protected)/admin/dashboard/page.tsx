@@ -37,22 +37,13 @@ import {
   Activity,
 } from "lucide-react";
 
-type IncidentStatus = "pending" | "reviewed" | "resolved";
-
-interface Incident {
-  $id: string;
-  category: string;
-  type: string;
-  description?: string;
-  urgency: "low" | "medium" | "high";
-  lat: number;
-  lng: number;
-  status: IncidentStatus;
-  $createdAt: string;
-  userId: string;
-  notes?: string;
-  mediaIds?: string[];
-}
+import {
+  IncidentDocs,
+  IncidentData,
+  IncidentStatus,
+  IncidentUrgency,
+  IncidentDoc,
+} from "@/schemas/incidents";
 
 interface Resource {
   id: string;
@@ -101,8 +92,8 @@ const MOCK_RESOURCES: Resource[] = [
 ];
 
 export default function AdminDashboardPage() {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(
+  const [incidents, setIncidents] = useState<IncidentDocs>([]);
+  const [selectedIncident, setSelectedIncident] = useState<IncidentDoc | null>(
     null
   );
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
@@ -122,7 +113,7 @@ export default function AdminDashboardPage() {
       setLoading(true);
       const res = await fetch("/api/incidents");
       if (res.ok) {
-        const data: Incident[] = await res.json();
+        const data: IncidentDocs = await res.json();
         setIncidents(data);
       }
     } catch (error) {
@@ -215,7 +206,7 @@ export default function AdminDashboardPage() {
           </TabsList>
           <Select
             value={filterStatus}
-            onValueChange={(v) => setFilterStatus(v as any)}
+            onValueChange={(v) => setFilterStatus(v as IncidentStatus | "all")}
           >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Filter status" />

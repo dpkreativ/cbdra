@@ -142,5 +142,7 @@ export type IncidentCreateData = z.infer<typeof incidentCreateSchema>;
  * Document schemas (with system fields)
  */
 export const incidentDocSchema = withSystemFields(incidentDataSchema.shape);
+export type IncidentDoc = z.infer<typeof incidentDocSchema>;
+
 export const incidentDocsSchema = z.array(incidentDocSchema);
 export type IncidentDocs = z.infer<typeof incidentDocsSchema>;

@@ -1,19 +1,73 @@
+import { NextRequest, NextResponse } from "next/server";
+import { ID, Permission, Role } from "node-appwrite";
 import { createAdminClient, withSession } from "@/lib/appwrite";
 import { requiredEnv } from "@/lib/utils";
 import {
-  incidentCategories,
-  incidentDocsSchema,
-  incidentStatus,
   incidentCreateSchema,
+  incidentDocsSchema,
+  IncidentDoc,
 } from "@/schemas/incidents";
-import { NextResponse, NextRequest } from "next/server";
-import { ID, Permission, Role } from "node-appwrite";
+
+export async function GET() {
+  try {
+    const { databases } = await createAdminClient();
+    const DB_ID = requiredEnv("APPWRITE_DB_ID");
+    const INCIDENTS_COLLECTION_ID = requiredEnv(
+      "APPWRITE_INCIDENTS_COLLECTION_ID"
+    );
+
+    const { documents } = await databases.listDocuments(
+      DB_ID,
+      INCIDENTS_COLLECTION_ID
+    );
+
+    // 🔧 Normalize raw docs before schema validation
+    const normalized = documents.map((doc: any) => ({
+      ...doc,
+      category: [
+        "water",
+        "fire",
+        "geological",
+        "biological",
+        "crime",
+        "man-made",
+        "industrial",
+        "other",
+      ].includes(doc.category)
+        ? doc.category
+        : "other",
+      status: ["pending", "reviewed", "resolved"].includes(doc.status)
+        ? doc.status
+        : "pending",
+      notes: doc.notes ?? "", // replace null with empty string
+    }));
+
+    const safe = incidentDocsSchema.parse(normalized);
+    return NextResponse.json(safe, { status: 200 });
+  } catch (e) {
+    console.error("GET /api/incidents error:", e);
+    return NextResponse.json(
+      { error: "Failed to fetch incidents" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
+    // 🔐 Ensure user is logged in
+    const sessionClient = await withSession();
+    if (!sessionClient) {
+      return NextResponse.json(
+        { error: "Unauthorized: no session found" },
+        { status: 401 }
+      );
+    }
 
-    // Extract values
+    const user = await sessionClient.account.get();
+
+    // Parse form data
+    const formData = await req.formData();
     const values = {
       category: formData.get("category"),
       type: formData.get("type"),
@@ -22,40 +76,24 @@ export async function POST(req: NextRequest) {
       urgency: formData.get("urgency") || "medium",
       lat: Number(formData.get("lat") || 0),
       lng: Number(formData.get("lng") || 0),
-      media: formData.getAll("media"), // array of File
+      media: formData.getAll("media") as File[],
     };
 
-    // Validate form payload
-    const parsed = incidentCreateSchema.safeParse(values);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid data", issues: parsed.error.issues },
-        { status: 400 }
-      );
-    }
+    // ✅ Validate input
+    const parsed = incidentCreateSchema.parse(values);
 
-    // 🔐 Get current user
-    const sessionClient = await withSession();
-    if (!sessionClient) {
-      return NextResponse.json(
-        { error: "Unauthorized: No valid session" },
-        { status: 401 }
-      );
-    }
-    const user = await sessionClient.account.get();
-
+    const { storage, databases } = await createAdminClient();
     const DB_ID = requiredEnv("APPWRITE_DB_ID");
     const INCIDENTS_COLLECTION_ID = requiredEnv(
       "APPWRITE_INCIDENTS_COLLECTION_ID"
     );
     const STORAGE_BUCKET_ID = requiredEnv("APPWRITE_INCIDENTS_BUCKET_ID");
 
-    // ✅ Upload media files and collect file IDs
-    const { storage, databases } = sessionClient;
+    // Upload files if any
     let mediaIds: string[] = [];
-    if (parsed.data.media && parsed.data.media.length > 0) {
-      const uploadResults = await Promise.all(
-        parsed.data.media.map(async (file) => {
+    if (parsed.media && parsed.media.length > 0) {
+      const uploads = await Promise.all(
+        parsed.media.map(async (file) => {
           const upload = await storage.createFile(
             STORAGE_BUCKET_ID,
             ID.unique(),
@@ -64,30 +102,34 @@ export async function POST(req: NextRequest) {
           return upload.$id;
         })
       );
-      mediaIds = uploadResults;
+      mediaIds = uploads;
     }
 
-    // ✅ Create document in DB
+    // ✅ Create incident document
+    const incident: Omit<IncidentDoc, "$id" | "$createdAt" | "$updatedAt"> = {
+      category: parsed.category,
+      type: parsed.type,
+      description: parsed.description,
+      urgency: parsed.urgency,
+      lat: parsed.lat,
+      lng: parsed.lng,
+      notes: parsed.notes,
+      userId: user.$id,
+      status: "pending",
+      mediaIds,
+    };
+
     const doc = await databases.createDocument(
       DB_ID,
       INCIDENTS_COLLECTION_ID,
       ID.unique(),
-      {
-        category: parsed.data.category,
-        type: parsed.data.type,
-        description: parsed.data.description,
-        urgency: parsed.data.urgency,
-        lat: parsed.data.lat,
-        lng: parsed.data.lng,
-        notes: parsed.data.notes,
-        userId: user.$id,
-        status: "pending",
-        mediaIds, // ✅ store file IDs, not File objects
-      },
+      incident,
       [
-        Permission.read(Role.any()),
-        Permission.update(Role.user(user.$id)),
-        Permission.delete(Role.user(user.$id)),
+        Permission.read(Role.any()), // public read
+        Permission.update(Role.user(user.$id)), // user can update
+        Permission.delete(Role.user(user.$id)), // user can delete
+        Permission.update(Role.team("admins")), // admins manage
+        Permission.delete(Role.team("admins")),
       ]
     );
 
