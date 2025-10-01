@@ -90,6 +90,55 @@ export default function IncidentForm() {
   }
 
   async function onSubmit(values: IncidentFormValues) {
+    // try {
+    //   // ✅ File validation
+    //   if (values.media && Array.isArray(values.media)) {
+    //     if (values.media.length > 5) {
+    //       toast.error("You can upload a maximum of 5 files");
+    //       return;
+    //     }
+    //     for (const file of values.media) {
+    //       if (file.size > 5 * 1024 * 1024) {
+    //         toast.error("Each file must be under 5MB");
+    //         return;
+    //       }
+    //     }
+    //   }
+
+    //   values.description = `${location} - ${values.description}`;
+
+    //   const fd = new FormData();
+    //   Object.entries(values).forEach(([key, val]) => {
+    //     if (key === "media" && Array.isArray(val)) {
+    //       val.forEach((file) => fd.append("media", file));
+    //     } else if (val !== undefined && val !== null) {
+    //       fd.append(key, String(val));
+    //     }
+    //   });
+
+    //   const res = await fetch("/api/incidents", {
+    //     method: "POST",
+    //     body: fd,
+    //   });
+
+    //   if (!res.ok) throw new Error("Failed to submit incident");
+
+    //   toast.success("✅ Incident submitted successfully!");
+    //   form.reset({
+    //     category: "other",
+    //     type: "other",
+    //     urgency: "medium",
+    //     lat,
+    //     lng,
+    //     media: [],
+    //   });
+    //   setPreviews([]);
+    //   router.push("/user/dashboard");
+    // } catch (err: any) {
+    //   console.error(err);
+    //   toast.error(err.message || "❌ Error submitting incident");
+    // }
+
     try {
       // ✅ File validation
       if (values.media && Array.isArray(values.media)) {
@@ -108,7 +157,9 @@ export default function IncidentForm() {
       values.description = `${location} - ${values.description}`;
 
       const fd = new FormData();
-      Object.entries(values).forEach(([key, val]) => {
+
+      (Object.keys(values) as (keyof IncidentFormValues)[]).forEach((key) => {
+        const val = values[key];
         if (key === "media" && Array.isArray(val)) {
           val.forEach((file) => fd.append("media", file));
         } else if (val !== undefined && val !== null) {
@@ -134,9 +185,11 @@ export default function IncidentForm() {
       });
       setPreviews([]);
       router.push("/user/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || "❌ Error submitting incident");
+      const message =
+        err instanceof Error ? err.message : "❌ Error submitting incident";
+      toast.error(message);
     }
   }
 

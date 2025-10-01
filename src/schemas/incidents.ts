@@ -40,23 +40,38 @@ export type IncidentStatus = z.infer<typeof incidentStatus>;
  * Base field schemas
  */
 const baseType = z.string().min(1, "Incident type is required");
-const baseDescription = z.string().optional(); // description optional
+const baseDescription = z.string().optional();
 
 /**
  * Schema for incident data stored in Appwrite (includes server fields like userId/status).
+ * Handles nullable enums from Appwrite by providing defaults.
  */
 export const incidentDataSchema = z
   .object({
-    category: incidentCategories,
+    category: incidentCategories
+      .nullable()
+      .default("other")
+      .transform((val) => val ?? "other"),
     type: baseType,
     description: baseDescription,
-    urgency: incidentUrgency,
+    urgency: incidentUrgency
+      .nullable()
+      .default("medium")
+      .transform((val) => val ?? "medium"),
     lat: z.number(),
     lng: z.number(),
     userId: z.string(),
-    status: incidentStatus.default("pending"),
+    status: incidentStatus
+      .nullable()
+      .default("pending")
+      .transform((val) => val ?? "pending"),
     mediaIds: z.array(z.string()).optional(),
-    notes: z.string().max(500).optional(),
+    notes: z
+      .string()
+      .max(500)
+      .nullable()
+      .optional()
+      .transform((val) => val ?? undefined),
   })
   .superRefine((obj, ctx) => {
     const { category, type } = obj as {
@@ -103,7 +118,12 @@ export const incidentCreateSchema = z
       .array(z.instanceof(File))
       .max(5, "You can upload up to 5 files")
       .optional(),
-    notes: z.string().max(500).optional(),
+    notes: z
+      .string()
+      .max(500)
+      .nullable()
+      .optional()
+      .transform((val) => val ?? undefined),
   })
   .superRefine((obj, ctx) => {
     const { category, type } = obj as {

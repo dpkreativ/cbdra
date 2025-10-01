@@ -17,10 +17,9 @@ import { cn } from "@/lib/utils";
 
 interface SidebarNavProps {
   links: { href: string; label: string; icon?: React.ReactNode }[];
-  title?: string;
 }
 
-function SidebarNav({ links, title }: SidebarNavProps) {
+function SidebarNav({ links }: SidebarNavProps) {
   const pathname = usePathname();
 
   return (
@@ -62,7 +61,7 @@ export function AdminSidebar() {
     { href: "/admin/users", label: "Users" },
     { href: "/admin/settings", label: "Settings" },
   ];
-  return <SidebarNav links={links} title="Admin Panel" />;
+  return <SidebarNav links={links} />;
 }
 
 export function UserSidebar() {
@@ -71,5 +70,5 @@ export function UserSidebar() {
     { href: "/user/get-help", label: "Report an Incident" },
     { href: "/user/my-reports", label: "My Reports" },
   ];
-  return <SidebarNav links={links} title="User Menu" />;
+  return <SidebarNav links={links} />;
 }

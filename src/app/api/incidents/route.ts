@@ -21,28 +21,7 @@ export async function GET() {
       INCIDENTS_COLLECTION_ID
     );
 
-    // 🔧 Normalize raw docs before schema validation
-    const normalized = documents.map((doc: any) => ({
-      ...doc,
-      category: [
-        "water",
-        "fire",
-        "geological",
-        "biological",
-        "crime",
-        "man-made",
-        "industrial",
-        "other",
-      ].includes(doc.category)
-        ? doc.category
-        : "other",
-      status: ["pending", "reviewed", "resolved"].includes(doc.status)
-        ? doc.status
-        : "pending",
-      notes: doc.notes ?? "", // replace null with empty string
-    }));
-
-    const safe = incidentDocsSchema.parse(normalized);
+    const safe = incidentDocsSchema.parse(documents);
     return NextResponse.json(safe, { status: 200 });
   } catch (e) {
     console.error("GET /api/incidents error:", e);
@@ -109,11 +88,11 @@ export async function POST(req: NextRequest) {
     const incident: Omit<IncidentDoc, "$id" | "$createdAt" | "$updatedAt"> = {
       category: parsed.category,
       type: parsed.type,
-      description: parsed.description,
+      description: parsed.description || "",
       urgency: parsed.urgency,
       lat: parsed.lat,
       lng: parsed.lng,
-      notes: parsed.notes,
+      notes: parsed.notes || "",
       userId: user.$id,
       status: "pending",
       mediaIds,

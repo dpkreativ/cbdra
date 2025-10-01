@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
-import mascot from "@/assets/images/mascot-1.svg";
-import Image from "next/image";
-import Link from "next/link";
 import { getUser } from "@/actions/auth";
 import { MarketingHeader } from "@/components/layout/header";
 import { MarketingFooter } from "@/components/layout/footer";

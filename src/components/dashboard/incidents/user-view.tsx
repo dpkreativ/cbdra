@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import type { IncidentData, IncidentDocs } from "@/schemas/incidents";
+import type { IncidentDoc } from "@/schemas/incidents";
 
 interface Stats {
   total: number;
@@ -24,24 +24,21 @@ export function IncidentsStats() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [recentIncidents, setRecentIncidents] = useState<IncidentData[]>([]);
+  const [recentIncidents, setRecentIncidents] = useState<IncidentDoc[]>([]);
 
   useEffect(() => {
     async function fetchIncidents() {
       setLoading(true);
       try {
         const res = await fetch("/api/incidents");
-        const incidents: IncidentData[] = (await res.json()) || [];
+        const incidents: IncidentDoc[] = (await res.json()) || [];
 
-        setRecentIncidents(
-          incidents
-            .sort(
-              (a: any, b: any) =>
-                new Date((b as any).$createdAt).getTime() -
-                new Date((a as any).$createdAt).getTime()
-            )
-            .slice(0, 5)
-        ); // last 5 incidents
+        // Last 5 incidents by creation date
+        const sortedIncidents = [...incidents].sort(
+          (a, b) =>
+            new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime()
+        );
+        setRecentIncidents(sortedIncidents.slice(0, 5));
 
         const total = incidents.length;
         const pending = incidents.filter((i) => i.status === "pending").length;
@@ -53,17 +50,14 @@ export function IncidentsStats() {
         ).length;
 
         const resolvedIncidents = incidents.filter(
-          (i) =>
-            i.status === "resolved" &&
-            (i as any).$createdAt &&
-            (i as any).$updatedAt
+          (i) => i.status === "resolved" && i.$createdAt && i.$updatedAt
         );
 
         let avgResponseTime = "N/A";
         if (resolvedIncidents.length > 0) {
           const totalMinutes = resolvedIncidents.reduce((acc, i) => {
-            const created = new Date((i as any).$createdAt).getTime();
-            const updated = new Date((i as any).$updatedAt).getTime();
+            const created = new Date(i.$createdAt).getTime();
+            const updated = new Date(i.$updatedAt).getTime();
             return acc + (updated - created) / 1000 / 60;
           }, 0);
 
@@ -157,7 +151,7 @@ export function IncidentsStats() {
 
 // Component to display recent incidents
 interface RecentActivityProps {
-  incidents: IncidentData[];
+  incidents: IncidentDoc[];
   loading: boolean;
 }
 
@@ -181,10 +175,10 @@ function RecentActivity({ incidents, loading }: RecentActivityProps) {
           <p className="text-muted-foreground">No recent incidents</p>
         ) : (
           <ul className="space-y-2">
-            {incidents.map((incident, idx) => (
-              <li key={idx} className="border-b pb-1">
+            {incidents.map((incident) => (
+              <li key={incident.$id} className="border-b pb-1">
                 <Link
-                  href={`/user/incidents/${`1`}`}
+                  href={`/user/incidents/${incident.$id}`}
                   className="block hover:bg-gray-50 rounded p-2 transition"
                 >
                   <div className="flex justify-between items-center">

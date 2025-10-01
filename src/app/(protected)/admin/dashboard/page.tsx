@@ -37,13 +37,7 @@ import {
   Activity,
 } from "lucide-react";
 
-import {
-  IncidentDocs,
-  IncidentData,
-  IncidentStatus,
-  IncidentUrgency,
-  IncidentDoc,
-} from "@/schemas/incidents";
+import { IncidentDocs, IncidentStatus, IncidentDoc } from "@/schemas/incidents";
 
 interface Resource {
   id: string;
@@ -198,7 +192,10 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+      <Tabs
+        value={viewMode}
+        onValueChange={(v) => setViewMode(v as "map" | "list")}
+      >
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="list">List</TabsTrigger>
