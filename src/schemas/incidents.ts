@@ -66,11 +66,7 @@ export const incidentDataSchema = z
       .default("pending")
       .transform((val) => val ?? "pending"),
     mediaIds: z.array(z.string()).optional(),
-    notes: z
-      .string()
-      .max(500)
-      .optional()
-      .transform((val) => val ?? ""),
+    notes: z.string().max(500).optional(),
   })
   .superRefine((obj, ctx) => {
     const { category, type } = obj as {
@@ -117,11 +113,7 @@ export const incidentCreateSchema = z
       .array(z.instanceof(File))
       .max(5, "You can upload up to 5 files")
       .optional(),
-    notes: z
-      .string()
-      .max(500)
-      .optional()
-      .transform((val) => val ?? ""),
+    notes: z.string().max(500).optional(),
   })
   .superRefine((obj, ctx) => {
     const { category, type } = obj as {
