@@ -69,9 +69,8 @@ export const incidentDataSchema = z
     notes: z
       .string()
       .max(500)
-      .nullable()
       .optional()
-      .transform((val) => val ?? undefined),
+      .transform((val) => val ?? ""),
   })
   .superRefine((obj, ctx) => {
     const { category, type } = obj as {
@@ -121,9 +120,8 @@ export const incidentCreateSchema = z
     notes: z
       .string()
       .max(500)
-      .nullable()
       .optional()
-      .transform((val) => val ?? undefined),
+      .transform((val) => val ?? ""),
   })
   .superRefine((obj, ctx) => {
     const { category, type } = obj as {
