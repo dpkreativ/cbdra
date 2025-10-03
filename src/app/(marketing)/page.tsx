@@ -2,14 +2,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import illustration from "@/assets/images/illustration.svg";
 import Image from "next/image";
-import {
-  HeartHandshake,
-  Megaphone,
-  Siren,
-  Shield,
-  Clock,
-  Users,
-} from "lucide-react";
+import { HeartHandshake, Megaphone, Shield, Clock, Users } from "lucide-react";
 
 export default function Home() {
   return (
@@ -17,9 +10,9 @@ export default function Home() {
       {/* Hero section with gradient background */}
       <section className="relative py-10 md:py-20 overflow-hidden">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-tl from-primary/5 to-transparent -z-10" />
 
-        <div className="w-full max-w-[1200px] mx-auto grid md:grid-cols-2 content-center">
+        <div className="w-full max-w-[1200px] mx-auto grid md:grid-cols-2 content-center py-16">
           <div className="order-2 md:order-1 p-5 flex flex-col justify-center gap-8 text-center md:text-left">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium w-fit mx-auto md:mx-0">
               <Shield className="w-4 h-4" />
@@ -62,7 +55,10 @@ export default function Home() {
             </div>
 
             {/* Quick stats */}
-            <div className="grid grid-cols-3 gap-4 pt-8 border-t">
+            <div
+              className="grid grid-cols-3 gap-4 pt-8 border-t"
+              id="quick-stats"
+            >
               <div>
                 <div className="text-2xl font-bold text-primary">2.5K+</div>
                 <div className="text-sm text-muted-foreground">
@@ -88,7 +84,7 @@ export default function Home() {
             <Image
               src={illustration}
               alt="CBDRA"
-              className="w-full max-w-2xl mx-auto drop-shadow-2xl"
+              className="w-full max-w-xl mx-auto drop-shadow-2xl"
               priority
             />
           </div>
@@ -99,7 +95,7 @@ export default function Home() {
       <section id="how-it-works" className="p-5 py-20 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
               How It Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -110,14 +106,13 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="relative p-6 bg-background rounded-2xl border shadow-sm hover:shadow-lg transition-all group">
-              <div className="absolute -top-4 left-6 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                1
-              </div>
-              <div className="mt-6 space-y-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Megaphone className="w-6 h-6 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary font-bold text-white rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    1
+                  </div>
+                  <h3 className="text-xl font-semibold">Report Incident</h3>
                 </div>
-                <h3 className="text-xl font-semibold">Report Incident</h3>
                 <p className="text-muted-foreground">
                   Quickly report emergencies with photos, videos, and precise
                   location. Our intuitive form makes it easy.
@@ -126,14 +121,13 @@ export default function Home() {
             </div>
 
             <div className="relative p-6 bg-background rounded-2xl border shadow-sm hover:shadow-lg transition-all group">
-              <div className="absolute -top-4 left-6 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                2
-              </div>
-              <div className="mt-6 space-y-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Siren className="w-6 h-6 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary font-bold text-white rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    2
+                  </div>
+                  <h3 className="text-xl font-semibold">Instant Alert</h3>
                 </div>
-                <h3 className="text-xl font-semibold">Instant Alert</h3>
                 <p className="text-muted-foreground">
                   Nearby volunteers, NGOs, and emergency services receive
                   instant notifications about your incident.
@@ -142,14 +136,13 @@ export default function Home() {
             </div>
 
             <div className="relative p-6 bg-background rounded-2xl border shadow-sm hover:shadow-lg transition-all group">
-              <div className="absolute -top-4 left-6 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                3
-              </div>
-              <div className="mt-6 space-y-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <HeartHandshake className="w-6 h-6 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary font-bold text-white rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                    3
+                  </div>
+                  <h3 className="text-xl font-semibold">Get Support</h3>
                 </div>
-                <h3 className="text-xl font-semibold">Get Support</h3>
                 <p className="text-muted-foreground">
                   Community responders arrive quickly. Track their progress in
                   real-time until help arrives.
@@ -161,10 +154,10 @@ export default function Home() {
       </section>
 
       {/* Features section */}
-      <section className="p-5 py-20">
+      <section className="px-5 pb-10 pt-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
               Why Choose CBDRA?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -173,42 +166,28 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 text-center space-y-3">
-              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Clock className="w-7 h-7 text-primary" />
-              </div>
+            <div className="p-6 text-center flex flex-col gap-3 items-center">
+              <Clock className="w-7 h-7" />
               <h3 className="font-semibold">Fast Response</h3>
-              <p className="text-sm text-muted-foreground">
-                Average response time under 15 minutes
-              </p>
+              <p className="text-sm">Average response time under 15 minutes</p>
             </div>
 
-            <div className="p-6 text-center space-y-3">
-              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Shield className="w-7 h-7 text-primary" />
-              </div>
+            <div className="p-6 text-center flex flex-col gap-3 items-center">
+              <Shield className="w-7 h-7" />
               <h3 className="font-semibold">Verified Responders</h3>
-              <p className="text-sm text-muted-foreground">
-                All volunteers are background-checked
-              </p>
+              <p className="text-sm">All volunteers are background-checked</p>
             </div>
 
-            <div className="p-6 text-center space-y-3">
-              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Users className="w-7 h-7 text-primary" />
-              </div>
+            <div className="p-6 text-center flex flex-col gap-3 items-center">
+              <Users className="w-7 h-7" />
               <h3 className="font-semibold">Community Driven</h3>
-              <p className="text-sm text-muted-foreground">
-                Powered by local volunteers who care
-              </p>
+              <p className="text-sm">Powered by local volunteers who care</p>
             </div>
 
-            <div className="p-6 text-center space-y-3">
-              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Megaphone className="w-7 h-7 text-primary" />
-              </div>
+            <div className="p-6 text-center flex flex-col gap-3 items-center">
+              <Megaphone className="w-7 h-7" />
               <h3 className="font-semibold">Real-Time Updates</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm">
                 Track incident status from report to resolution
               </p>
             </div>
@@ -217,22 +196,20 @@ export default function Home() {
       </section>
 
       {/* CTA section - Enhanced */}
-      <section className="relative px-5 py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/80 -z-10" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 -z-10" />
-
-        <div className="max-w-4xl mx-auto text-center text-white space-y-8">
-          <h2 className="text-3xl md:text-4xl font-bold">
+      <section className="relative px-5 pt-10 pb-20 overflow-hidden">
+        {/* Background gradient */}
+        {/* <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-primary/5 to-transparent -z-10" /> */}
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <h2 className="text-2xl md:text-3xl font-bold">
             Ready to Make a Difference?
           </h2>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl max-w-2xl mx-auto">
             Join thousands of volunteers helping their communities during
             emergencies. Your support can save lives.
           </p>
           <Link href="/signup">
             <Button
               size="lg"
-              variant="ghost"
               className="shadow-xl hover:shadow-2xl transition-all"
             >
               <HeartHandshake className="w-5 h-5" />

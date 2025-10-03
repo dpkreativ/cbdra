@@ -1,7 +1,11 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
 import { AdminHeader } from "@/components/layout/header";
-import { AdminSidebar } from "@/components/layout/sidebar";
+import { AdminSidebar } from "@/components/layout/sidebar-nav";
+import { getUser, signout } from "@/actions/auth";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { Metadata } from "next";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,21 +17,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default async function ProtectedLayout({
+export const metadata: Metadata = {
+  title: "CBDRA - Admin",
+  description: "Get the help you need during emergencies.",
+};
+
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getUser();
+
   return (
-    <html>
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AdminHeader />
-        <div className="flex h-full">
+        <AdminHeader user={user} signout={signout} />
+        <SidebarProvider>
           <AdminSidebar />
-          {children}
-        </div>
+          <main className="overflow-y-auto p-5 md:p-8 space-y-8 w-full">
+            {children}
+          </main>
+          <Toaster />
+        </SidebarProvider>
       </body>
     </html>
   );
