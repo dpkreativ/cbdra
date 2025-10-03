@@ -67,8 +67,10 @@ export async function login(
       path: "/",
     });
 
-    // Fetch user to get role
-    const user = await account.get();
+    const { account: sessionAccount } = await createSessionClient(
+      session.secret
+    );
+    const user = await sessionAccount.get();
     const role = (user.prefs.role as UserRole) || "community";
 
     return {
