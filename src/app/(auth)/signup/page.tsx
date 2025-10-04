@@ -5,12 +5,11 @@ import mascot from "@/assets/images/mascot-1.svg";
 
 export default async function Page() {
   return (
-    <div className="px-5 py-10 w-full max-w-md mx-auto flex flex-col gap-8">
+    <div className="px-5 py-10 w-full max-w-md mx-auto min-h-screen flex flex-col gap-8">
       {/* Header */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 items-center text-center md:text-left md:items-start">
         <div className="flex items-center gap-2">
           <Image src={mascot} alt="Mascot" className="w-5" />
-
           <h2 className="text-2xl font-bold">Create Your Account</h2>
         </div>
         <p className="text-muted-foreground">
