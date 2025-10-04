@@ -180,7 +180,7 @@ export async function signout() {
     cookieStore.delete("session");
   }
 
-  redirect("/login");
+  redirect("/");
 }
 
 /**

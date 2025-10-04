@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import mascot from "@/assets/images/mascot-1.svg";
 import Link from "next/link";
@@ -16,21 +18,31 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
-export function AdminHeader({
+interface HeaderBaseProps {
+  user?: Models.User | null;
+  signout?: () => void;
+  title: string;
+  searchPlaceholder?: string;
+  accountLabel: string;
+  navLinks: { href: string; label: string }[];
+}
+
+export function HeaderBase({
   user,
   signout,
-}: {
-  user?: Models.User | null;
-  signout: () => void;
-}) {
+  title,
+  searchPlaceholder = "Search...",
+  accountLabel,
+  navLinks,
+}: HeaderBaseProps) {
   return (
-    <header className="sticky top-0 z-50 bg-white/50 backdrop-blur-3xl border-b">
+    <header className="sticky w-full top-0 z-50 bg-white/50 backdrop-blur-3xl border-b">
       <div className="p-5 w-full flex items-center justify-between gap-5">
         {/* Logo + Title */}
         <Link href="/" className="flex items-center gap-2">
           <Image src={mascot} alt="Mascot" className="w-5" />
           <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl">
-            CBDRA - Admin
+            {title}
           </h1>
         </Link>
 
@@ -45,7 +57,7 @@ export function AdminHeader({
             />
             <Input
               type="search"
-              placeholder="Search incidents or resources..."
+              placeholder={searchPlaceholder}
               className="pl-10 w-full"
             />
           </div>
@@ -61,7 +73,7 @@ export function AdminHeader({
             <DropdownMenuContent>
               <DropdownMenuLabel>Notifications</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>No new alerts</DropdownMenuItem>
+              <DropdownMenuItem>No new notifications</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -69,21 +81,23 @@ export function AdminHeader({
           <DropdownMenu>
             <DropdownMenuTrigger className="flex gap-2 items-center">
               <Icon icon="solar:user-outline" width="16" height="16" />
-              <p>{user?.name ?? "Admin"}</p>
+              <p>{user?.name ?? "User"}</p>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{accountLabel}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/admin/profile">Profile</Link>
+                <Link href="/profile">Profile</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={signout}
-                className="flex gap-2 items-center cursor-pointer"
-              >
-                <Icon icon="material-symbols:logout" width="16" height="16" />
-                <p>Logout</p>
-              </DropdownMenuItem>
+              {signout && (
+                <DropdownMenuItem
+                  onClick={signout}
+                  className="flex gap-2 items-center cursor-pointer"
+                >
+                  <Icon icon="material-symbols:logout" width="16" height="16" />
+                  <p>Logout</p>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -100,22 +114,74 @@ export function AdminHeader({
               side="right"
               className="w-72 sm:w-80 px-5 py-10 gap-5 font-semibold"
             >
-              <Link href="/admin/dashboard">Dashboard</Link>
-              <Link href="/admin/incidents">Incidents</Link>
-              <Link href="/admin/resources">Resources</Link>
-              <Link href="/admin/settings">Settings</Link>
-              <Button
-                onClick={signout}
-                className="mt-5 w-full flex gap-2 items-center"
-              >
-                <Icon icon="material-symbols:logout" width="16" height="16" />
-                Logout
-              </Button>
+              {navLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  {link.label}
+                </Link>
+              ))}
+              {signout && (
+                <Button
+                  onClick={signout}
+                  className="mt-5 w-full flex gap-2 items-center"
+                >
+                  <Icon icon="material-symbols:logout" width="16" height="16" />
+                  Logout
+                </Button>
+              )}
             </SheetContent>
           </Sheet>
         </div>
       </div>
     </header>
+  );
+}
+
+export function AdminHeader({
+  user,
+  signout,
+}: {
+  user?: Models.User | null;
+  signout: () => void;
+}) {
+  return (
+    <HeaderBase
+      user={user}
+      signout={signout}
+      title="CBDRA - Admin"
+      accountLabel="Admin Account"
+      searchPlaceholder="Search incidents or resources..."
+      navLinks={[
+        { href: "/admin/dashboard", label: "Dashboard" },
+        { href: "/admin/resources", label: "Resources" },
+        { href: "/admin/users", label: "Users" },
+        { href: "/admin/settings", label: "Settings" },
+      ]}
+    />
+  );
+}
+
+export function VolunteerHeader({
+  user,
+  signout,
+}: {
+  user?: Models.User | null;
+  signout: () => void;
+}) {
+  return (
+    <HeaderBase
+      user={user}
+      signout={signout}
+      title="CBDRA - Volunteer"
+      accountLabel="Volunteer Account"
+      searchPlaceholder="Search assignments or resources..."
+      navLinks={[
+        { href: "/volunteer/dashboard", label: "Dashboard" },
+        { href: "/volunteer/assignments", label: "My Assignments" },
+        { href: "/volunteer/profile", label: "My Profile" },
+        { href: "/volunteer/resources", label: "Resources" },
+        { href: "/volunteer/settings", label: "Settings" },
+      ]}
+    />
   );
 }
 
@@ -127,63 +193,18 @@ export function UserHeader({
   signout: () => void;
 }) {
   return (
-    <header className="sticky w-full top-0 z-50 bg-white/50 backdrop-blur-3xl border-b">
-      <div className="p-5 w-full flex items-center justify-between gap-5">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src={mascot} alt="Mascot" className="w-5" />
-          <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl">CBDRA</h1>
-        </Link>
-
-        <div className="hidden md:flex items-center gap-2 flex-1 max-w-md px-4">
-          <div className="relative w-full">
-            <Icon
-              icon="iconamoon:search"
-              width="20"
-              height="20"
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              type="search"
-              placeholder="Search incidents..."
-              className="pl-10 w-full"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex gap-2 items-center">
-              <Icon icon="solar:user-outline" width="16" height="16" />
-              <p>{user?.name}</p>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={signout}
-                className="flex gap-2 items-center cursor-pointer"
-              >
-                <Icon icon="material-symbols:logout" width="16" height="16" />
-                <p>Logout</p>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex gap-2 items-center">
-              <Icon icon="hugeicons:notification-01" width="16" height="16" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Notification 1</DropdownMenuItem>
-              <DropdownMenuItem>Notification 2</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </header>
+    <HeaderBase
+      user={user}
+      signout={signout}
+      title="CBDRA"
+      accountLabel="My Account"
+      searchPlaceholder="Search incidents..."
+      navLinks={[
+        { href: "/user/dashboard", label: "Dashboard" },
+        { href: "/user/get-help", label: "Report an Incident" },
+        { href: "/user/my-reports", label: "My Reports" },
+      ]}
+    />
   );
 }
 
@@ -200,16 +221,15 @@ export function MarketingHeader({ user }: { user?: Models.User | null }) {
           <Link href="/">Home</Link>
           <Link href="/#how-it-works">How it works</Link>
           {user ? (
-            <Link href="/user/dashboard">
+            <Link href="/dashboard">
               <Button size="lg">Go to Dashboard</Button>
             </Link>
           ) : (
-            <Link href="/login">
+            <Link href="/signup">
               <Button size="lg">Get started</Button>
             </Link>
           )}
         </nav>
-
         {/* Mobile nav */}
         <nav className="md:hidden">
           <Sheet>
@@ -222,11 +242,11 @@ export function MarketingHeader({ user }: { user?: Models.User | null }) {
               <Link href="/">Home</Link>
               <Link href="/#how-it-works">How it works</Link>
               {user ? (
-                <Link href="/user/dashboard">
+                <Link href="/dashboard">
                   <Button size="lg">Go to Dashboard</Button>
                 </Link>
               ) : (
-                <Link href="/login">
+                <Link href="/signup">
                   <Button size="lg">Get Started</Button>
                 </Link>
               )}

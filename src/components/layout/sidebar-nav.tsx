@@ -72,3 +72,15 @@ export function UserSidebar() {
   ];
   return <SidebarNav links={links} />;
 }
+
+export function VolunteerSidebar() {
+  const links = [
+    { href: "/volunteer/dashboard", label: "Dashboard" },
+    { href: "/volunteer/assignments", label: "My Assignments" },
+    { href: "/volunteer/profile", label: "My Profile" },
+    { href: "/volunteer/resources", label: "Resources" },
+    { href: "/volunteer/settings", label: "Settings" },
+  ];
+
+  return <SidebarNav links={links} />;
+}
