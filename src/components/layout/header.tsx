@@ -27,9 +27,11 @@ export function AdminHeader({
     <header className="sticky top-0 z-50 bg-white/50 backdrop-blur-3xl border-b">
       <div className="p-5 w-full flex items-center justify-between gap-5">
         {/* Logo + Title */}
-        <Link href="/admin" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <Image src={mascot} alt="Mascot" className="w-5" />
-          <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl">Admin</h1>
+          <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl">
+            CBDRA - Admin
+          </h1>
         </Link>
 
         {/* Search */}
