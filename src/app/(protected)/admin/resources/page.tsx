@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Users,
   Search,
   CheckCircle,
   XCircle,
@@ -43,18 +42,47 @@ import {
   Building,
   Heart,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-// Mock data
-const MOCK_RESOURCES = [
+/* -------------------------------
+   Types
+-------------------------------- */
+type ResourceType = "volunteer" | "ngo" | "gov";
+
+interface Resource {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  type: ResourceType;
+  available: boolean;
+  skills: string[];
+  location: string;
+  joinedDate: string;
+  assignedIncidents: number;
+  resolvedIncidents: number;
+  rating: number;
+}
+
+interface TypeConfig {
+  label: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+/* -------------------------------
+   Mock Data (US-based)
+-------------------------------- */
+const MOCK_RESOURCES: Resource[] = [
   {
     id: "1",
     name: "John Doe",
     email: "john@example.com",
-    phone: "+234 801 234 5678",
+    phone: "+1 404 123 4567",
     type: "volunteer",
     available: true,
     skills: ["First Aid", "Search & Rescue"],
-    location: "Port Harcourt, Rivers",
+    location: "Atlanta, Georgia",
     joinedDate: "2024-01-15",
     assignedIncidents: 12,
     resolvedIncidents: 10,
@@ -62,13 +90,13 @@ const MOCK_RESOURCES = [
   },
   {
     id: "2",
-    name: "Red Cross Nigeria",
-    email: "contact@redcross.ng",
-    phone: "+234 802 345 6789",
+    name: "Red Cross Atlanta",
+    email: "contact@redcross.org",
+    phone: "+1 404 987 6543",
     type: "ngo",
     available: true,
     skills: ["Shelter", "Medical Aid", "Food Distribution"],
-    location: "Rivers State",
+    location: "Atlanta, Georgia",
     joinedDate: "2023-06-20",
     assignedIncidents: 45,
     resolvedIncidents: 42,
@@ -78,11 +106,11 @@ const MOCK_RESOURCES = [
     id: "3",
     name: "Jane Smith",
     email: "jane@example.com",
-    phone: "+234 803 456 7890",
+    phone: "+1 470 321 9876",
     type: "volunteer",
     available: false,
     skills: ["Counseling", "Community Outreach"],
-    location: "Port Harcourt, Rivers",
+    location: "Atlanta, Georgia",
     joinedDate: "2024-03-10",
     assignedIncidents: 8,
     resolvedIncidents: 7,
@@ -90,81 +118,56 @@ const MOCK_RESOURCES = [
   },
   {
     id: "4",
-    name: "Fire Service Department",
-    email: "fire@rivers.gov.ng",
-    phone: "+234 804 567 8901",
+    name: "Atlanta Fire Service",
+    email: "fire@atlanta.gov",
+    phone: "+1 404 555 7890",
     type: "gov",
     available: true,
     skills: ["Fire Response", "Emergency Rescue", "Safety"],
-    location: "Rivers State",
+    location: "Atlanta, Georgia",
     joinedDate: "2023-01-05",
     assignedIncidents: 78,
     resolvedIncidents: 75,
     rating: 4.95,
   },
-  {
-    id: "5",
-    name: "Community Health Initiative",
-    email: "info@chi.org",
-    phone: "+234 805 678 9012",
-    type: "ngo",
-    available: true,
-    skills: ["Medical Response", "Health Education"],
-    location: "Port Harcourt, Rivers",
-    joinedDate: "2023-08-12",
-    assignedIncidents: 34,
-    resolvedIncidents: 32,
-    rating: 4.7,
-  },
-  {
-    id: "6",
-    name: "Michael Johnson",
-    email: "michael@example.com",
-    phone: "+234 806 789 0123",
-    type: "volunteer",
-    available: true,
-    skills: ["Logistics", "Transportation"],
-    location: "Obio-Akpor, Rivers",
-    joinedDate: "2024-02-28",
-    assignedIncidents: 15,
-    resolvedIncidents: 14,
-    rating: 4.5,
-  },
 ];
 
-const TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> =
-  {
-    volunteer: {
-      label: "Volunteer",
-      icon: Heart,
-      color: "text-blue-600 bg-blue-100",
-    },
-    ngo: {
-      label: "NGO",
-      icon: Building,
-      color: "text-purple-600 bg-purple-100",
-    },
-    gov: {
-      label: "Government",
-      icon: Shield,
-      color: "text-emerald-600 bg-emerald-100",
-    },
-  };
+/* -------------------------------
+   Config for Resource Types
+-------------------------------- */
+const TYPE_CONFIG: Record<ResourceType, TypeConfig> = {
+  volunteer: {
+    label: "Volunteer",
+    icon: Heart,
+    color: "text-blue-600 bg-blue-100",
+  },
+  ngo: {
+    label: "NGO",
+    icon: Building,
+    color: "text-purple-600 bg-purple-100",
+  },
+  gov: {
+    label: "Government",
+    icon: Shield,
+    color: "text-emerald-600 bg-emerald-100",
+  },
+};
 
-type Resource = (typeof MOCK_RESOURCES)[0];
-
+/* -------------------------------
+   Component
+-------------------------------- */
 export default function ResourcesAdminPage() {
-  const [resources, setResources] = useState(MOCK_RESOURCES);
+  const [resources, setResources] = useState<Resource[]>(MOCK_RESOURCES);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState("all");
-  const [filterAvailability, setFilterAvailability] = useState("all");
-  const [viewDetailsDialog, setViewDetailsDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterAvailability, setFilterAvailability] = useState<string>("all");
+  const [viewDetailsDialog, setViewDetailsDialog] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("all");
 
-  // Filter resources
+  // Filter logic
   const filteredResources = resources.filter((resource) => {
     const matchesSearch =
       resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -174,12 +177,10 @@ export default function ResourcesAdminPage() {
       );
 
     const matchesType = filterType === "all" || resource.type === filterType;
-
     const matchesAvailability =
       filterAvailability === "all" ||
       (filterAvailability === "available" && resource.available) ||
       (filterAvailability === "unavailable" && !resource.available);
-
     const matchesTab = activeTab === "all" || resource.type === activeTab;
 
     return matchesSearch && matchesType && matchesAvailability && matchesTab;
@@ -331,7 +332,7 @@ export default function ResourcesAdminPage() {
         </CardContent>
       </Card>
 
-      {/* Tabs */}
+      {/* Tabs + Table */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="all">All ({stats.total})</TabsTrigger>

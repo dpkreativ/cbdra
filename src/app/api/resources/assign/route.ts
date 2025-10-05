@@ -1,3 +1,4 @@
+import { COLLECTIONS, DB_ID } from "@/config/appwrite";
 import { createAdminClient } from "@/lib/appwrite";
 import { NextRequest, NextResponse } from "next/server";
 import { ID } from "node-appwrite";
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
     resourceIds.map(async (resourceId: string) => {
       return databases.createDocument(
         DB_ID,
-        ASSIGNMENTS_COLLECTION_ID,
+        COLLECTIONS.ASSIGNMENTS,
         ID.unique(),
         {
           incidentId,
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   );
 
   // Update incident with assigned resources
-  await databases.updateDocument(DB_ID, INCIDENTS_COLLECTION_ID, incidentId, {
+  await databases.updateDocument(DB_ID, COLLECTIONS.INCIDENTS, incidentId, {
     assignedResources: resourceIds,
     status: "reviewed", // Move from pending to reviewed
   });

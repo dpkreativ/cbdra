@@ -74,103 +74,6 @@ interface CompletedAssignment extends BaseAssignment {
 }
 
 /* ----------------------------
-   Mock Data (US Locations)
------------------------------ */
-const MOCK_ASSIGNMENTS: ActiveAssignment[] = [
-  {
-    id: "1",
-    incidentType: "Flood",
-    category: "water",
-    description:
-      "Flash flooding in Atlanta neighborhood affecting 50+ families",
-    location: "Atlanta, Georgia",
-    coordinates: { lat: 33.749, lng: -84.388 },
-    urgency: "high",
-    status: "in-progress",
-    assignedAt: "2024-10-04T08:30:00Z",
-    acceptedAt: "2024-10-04T08:35:00Z",
-    requiredSkills: ["Search & Rescue", "First Aid"],
-    estimatedDuration: "4-6 hours",
-    distance: "5 miles away",
-    contactPerson: "Sarah Johnson",
-    contactPhone: "+1 404-555-1234",
-    contactEmail: "sarah.johnson@example.com",
-    otherVolunteers: ["Jane Smith", "Michael Lee"],
-    notes: "Bring water purification tablets if available",
-  },
-  {
-    id: "2",
-    incidentType: "Building Fire",
-    category: "fire",
-    description: "Small fire in residential building, evacuation assistance",
-    location: "Decatur, Georgia",
-    coordinates: { lat: 33.7748, lng: -84.2963 },
-    urgency: "medium",
-    status: "in-progress",
-    assignedAt: "2024-10-03T14:20:00Z",
-    acceptedAt: "2024-10-03T14:25:00Z",
-    requiredSkills: ["First Aid", "Community Outreach"],
-    estimatedDuration: "2-3 hours",
-    distance: "7 miles away",
-    contactPerson: "Chief Roberts",
-    contactPhone: "+1 404-555-5678",
-    contactEmail: "firedept@decatur.gov",
-    otherVolunteers: ["Sarah Wilson"],
-    notes: "Meet at the fire station first",
-  },
-  {
-    id: "3",
-    incidentType: "Medical Emergency",
-    category: "biological",
-    description: "Community health support after food poisoning outbreak",
-    location: "Buckhead, Atlanta",
-    coordinates: { lat: 33.8487, lng: -84.3733 },
-    urgency: "medium",
-    status: "pending",
-    assignedAt: "2024-10-04T09:00:00Z",
-    requiredSkills: ["First Aid", "Community Outreach"],
-    estimatedDuration: "3-4 hours",
-    distance: "10 miles away",
-    contactPerson: "Dr. Chidi Nwosu",
-    contactPhone: "+1 404-555-9012",
-    contactEmail: "dr.nwosu@health.org",
-    otherVolunteers: ["John Eke", "Grace Okoro"],
-    notes: "Educational materials will be provided",
-  },
-];
-
-const COMPLETED_ASSIGNMENTS: CompletedAssignment[] = [
-  {
-    id: "4",
-    incidentType: "Traffic Accident",
-    category: "man-made",
-    description: "Minor traffic accident requiring first aid support",
-    location: "Midtown, Atlanta",
-    urgency: "low",
-    status: "completed",
-    assignedAt: "2024-10-02T10:15:00Z",
-    completedAt: "2024-10-02T12:45:00Z",
-    duration: "2h 25m",
-    rating: 5,
-    feedback: "Excellent response time and professionalism. Very helpful!",
-  },
-  {
-    id: "5",
-    incidentType: "Flood",
-    category: "water",
-    description: "Emergency evacuation support during heavy rainfall",
-    location: "East Point, Georgia",
-    urgency: "high",
-    status: "completed",
-    assignedAt: "2024-09-28T06:00:00Z",
-    completedAt: "2024-09-28T14:30:00Z",
-    duration: "8h 20m",
-    rating: 4.5,
-    feedback: "Great work coordinating with other volunteers. Thank you!",
-  },
-];
-
-/* ----------------------------
    Urgency Config
 ----------------------------- */
 const URGENCY_CONFIG = {
@@ -192,6 +95,103 @@ const URGENCY_CONFIG = {
 };
 
 /* ----------------------------
+   Mock Data (Atlanta, Georgia)
+----------------------------- */
+const MOCK_ASSIGNMENTS: ActiveAssignment[] = [
+  {
+    id: "1",
+    incidentType: "Flood",
+    category: "water",
+    description:
+      "Flash flooding in Atlanta neighborhood affecting 50+ families.",
+    location: "Atlanta, Georgia",
+    coordinates: { lat: 33.749, lng: -84.388 },
+    urgency: "high",
+    status: "in-progress",
+    assignedAt: "2024-10-04T08:30:00Z",
+    acceptedAt: "2024-10-04T08:35:00Z",
+    requiredSkills: ["Search & Rescue", "First Aid"],
+    estimatedDuration: "4-6 hours",
+    distance: "5 miles away",
+    contactPerson: "Sarah Johnson",
+    contactPhone: "+1 404-555-1234",
+    contactEmail: "sarah.johnson@example.com",
+    otherVolunteers: ["Jane Smith", "Michael Lee"],
+    notes: "Bring water purification tablets if available.",
+  },
+  {
+    id: "2",
+    incidentType: "Building Fire",
+    category: "fire",
+    description: "Small fire in residential building, evacuation assistance.",
+    location: "Decatur, Georgia",
+    coordinates: { lat: 33.7748, lng: -84.2963 },
+    urgency: "medium",
+    status: "in-progress",
+    assignedAt: "2024-10-03T14:20:00Z",
+    acceptedAt: "2024-10-03T14:25:00Z",
+    requiredSkills: ["First Aid", "Community Outreach"],
+    estimatedDuration: "2-3 hours",
+    distance: "7 miles away",
+    contactPerson: "Chief Roberts",
+    contactPhone: "+1 404-555-5678",
+    contactEmail: "firedept@decatur.gov",
+    otherVolunteers: ["Sarah Wilson"],
+    notes: "Meet at the fire station first.",
+  },
+  {
+    id: "3",
+    incidentType: "Medical Emergency",
+    category: "biological",
+    description: "Community health support after food poisoning outbreak.",
+    location: "Buckhead, Atlanta",
+    coordinates: { lat: 33.8487, lng: -84.3733 },
+    urgency: "medium",
+    status: "pending",
+    assignedAt: "2024-10-04T09:00:00Z",
+    requiredSkills: ["First Aid", "Community Outreach"],
+    estimatedDuration: "3-4 hours",
+    distance: "10 miles away",
+    contactPerson: "Dr. Chidi Nwosu",
+    contactPhone: "+1 404-555-9012",
+    contactEmail: "dr.nwosu@health.org",
+    otherVolunteers: ["John Eke", "Grace Okoro"],
+    notes: "Educational materials will be provided.",
+  },
+];
+
+const COMPLETED_ASSIGNMENTS: CompletedAssignment[] = [
+  {
+    id: "4",
+    incidentType: "Traffic Accident",
+    category: "man-made",
+    description: "Minor traffic accident requiring first aid support.",
+    location: "Midtown, Atlanta",
+    urgency: "low",
+    status: "completed",
+    assignedAt: "2024-10-02T10:15:00Z",
+    completedAt: "2024-10-02T12:45:00Z",
+    duration: "2h 25m",
+    rating: 5,
+    feedback: "Excellent response time and professionalism. Very helpful!",
+  },
+  {
+    id: "5",
+    incidentType: "Flood",
+    category: "water",
+    description: "Emergency evacuation support during heavy rainfall.",
+    location: "East Point, Georgia",
+    urgency: "high",
+    status: "completed",
+    assignedAt: "2024-09-28T06:00:00Z",
+    completedAt: "2024-09-28T14:30:00Z",
+    duration: "8h 20m",
+    rating: 4.5,
+    feedback: "Great work coordinating with other volunteers. Thank you!",
+  },
+];
+
+/* ----------------------------
    Component
 ----------------------------- */
 export default function VolunteerAssignmentsPage() {
@@ -209,6 +209,13 @@ export default function VolunteerAssignmentsPage() {
     "all"
   );
 
+  // ✅ Fix: Type-safe handler for Select
+  const handleStatusChange = (value: string) => {
+    if (value === "all" || value === "pending" || value === "in-progress") {
+      setFilterStatus(value);
+    }
+  };
+
   const filteredActive = activeAssignments.filter(
     (a) => filterStatus === "all" || a.status === filterStatus
   );
@@ -221,12 +228,12 @@ export default function VolunteerAssignmentsPage() {
     completed: completedAssignments.length,
   };
 
-  const handleViewDetails = (assignment: ActiveAssignment) => {
+  const handleViewDetails = (assignment: ActiveAssignment): void => {
     setSelectedAssignment(assignment);
     setViewDetailsDialog(true);
   };
 
-  const handleAcceptAssignment = (assignmentId: string) => {
+  const handleAcceptAssignment = (assignmentId: string): void => {
     setActiveAssignments((prev) =>
       prev.map((a) =>
         a.id === assignmentId
@@ -241,15 +248,14 @@ export default function VolunteerAssignmentsPage() {
     setViewDetailsDialog(false);
   };
 
-  const handleOpenComplete = (assignment: ActiveAssignment) => {
+  const handleOpenComplete = (assignment: ActiveAssignment): void => {
     setSelectedAssignment(assignment);
     setCompleteDialog(true);
     setViewDetailsDialog(false);
   };
 
-  const handleCompleteAssignment = () => {
+  const handleCompleteAssignment = (): void => {
     if (!selectedAssignment) return;
-    console.log("Completing with notes:", completionNotes);
     setActiveAssignments((prev) =>
       prev.filter((a) => a.id !== selectedAssignment.id)
     );
@@ -257,7 +263,7 @@ export default function VolunteerAssignmentsPage() {
     setCompletionNotes("");
   };
 
-  const handleGetDirections = (coords: Coordinates) => {
+  const handleGetDirections = (coords: Coordinates): void => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`;
     window.open(url, "_blank");
   };
@@ -285,7 +291,7 @@ export default function VolunteerAssignmentsPage() {
       <div>
         <h1 className="text-3xl font-bold">My Assignments</h1>
         <p className="text-muted-foreground mt-1">
-          Track and manage your volunteer assignments
+          Track and manage your volunteer assignments.
         </p>
       </div>
 
@@ -354,7 +360,7 @@ export default function VolunteerAssignmentsPage() {
         <TabsContent value="active" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <Select value={filterStatus} onValueChange={handleStatusChange}>
                 <SelectTrigger className="w-full md:w-64">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -536,7 +542,7 @@ export default function VolunteerAssignmentsPage() {
               <CardContent className="py-12 text-center">
                 <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">
-                  No completed assignments yet
+                  No completed assignments yet.
                 </p>
               </CardContent>
             </Card>
@@ -615,7 +621,7 @@ export default function VolunteerAssignmentsPage() {
           <DialogHeader>
             <DialogTitle>Assignment Details</DialogTitle>
             <DialogDescription>
-              Complete information about this assignment
+              Complete information about this assignment.
             </DialogDescription>
           </DialogHeader>
           {selectedAssignment && (
@@ -724,7 +730,7 @@ export default function VolunteerAssignmentsPage() {
           <DialogHeader>
             <DialogTitle>Complete Assignment</DialogTitle>
             <DialogDescription>
-              Please provide any final notes about this assignment
+              Please provide any final notes about this assignment.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

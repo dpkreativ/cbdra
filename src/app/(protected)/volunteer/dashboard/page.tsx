@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getUser } from "@/actions/auth"; // ✅ your existing helper
+import { getUser } from "@/actions/auth";
 import { Models } from "node-appwrite";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Heart,
   MapPin,

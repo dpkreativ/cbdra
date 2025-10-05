@@ -4,89 +4,103 @@ import { Query } from "node-appwrite";
 import { resourcePrefsSchema } from "@/schemas/resources";
 import { DB_ID, COLLECTIONS } from "@/config/appwrite";
 
+// --------------------
 // GET - Fetch detailed resource info
+// --------------------
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { users, databases } = await createAdminClient();
-    
-    // Get user details
-    const user = await users.get(params.id);
-    
-    // Fetch their assignment history
-    const { documents: assignments } = await databases.listDocuments(
-      DB_ID,
-      COLLECTIONS.ASSIGNMENTS,
-      [
-        Query.equal("resourceId", params.id),
-        Query.orderDesc("assignedAt"),
-        Query.limit(50) // Limit to most recent 50 assignments
-      ]
-    );
 
-    // Validate and parse user prefs
+    const [user, assignmentsResponse] = await Promise.all([
+      users.get(id),
+      databases.listDocuments(DB_ID, COLLECTIONS.ASSIGNMENTS, [
+        Query.equal("resourceId", id),
+        Query.orderDesc("assignedAt"),
+        Query.limit(50),
+      ]),
+    ]);
+
     const prefs = resourcePrefsSchema.parse(user.prefs || {});
 
     return NextResponse.json({
       id: user.$id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
       ...user,
       prefs,
-      assignments
+      assignments: assignmentsResponse.documents,
     });
   } catch (error) {
-    console.error(`Error fetching resource ${params.id}:`, error);
+    console.error(`Error fetching resource:`, error);
+    const status =
+      error instanceof Error && error.message.includes("not found") ? 404 : 500;
     return NextResponse.json(
-      { error: 'Failed to fetch resource details' },
-      { status: 404 }
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch resource details",
+      },
+      { status }
     );
   }
 }
 
+// --------------------
 // PATCH - Update resource details
+// --------------------
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const updates = await req.json();
     const { users } = await createAdminClient();
-    
-    // Get current user to validate and merge updates
-    const user = await users.get(params.id);
+
+    // Fetch current user
+    const user = await users.get(id);
+
+    // Validate and merge preferences
     const currentPrefs = resourcePrefsSchema.parse(user.prefs || {});
-    
-    // Validate updates against schema (only allow updating specific fields)
     const updatedPrefs = resourcePrefsSchema.partial().parse(updates);
-    
-    // Merge updates with existing prefs
     const mergedPrefs = { ...currentPrefs, ...updatedPrefs };
-    
-    // Update user prefs with merged data
-    await users.updatePrefs(params.id, mergedPrefs);
-    
-    // If name or phone is being updated, update those fields as well
-    const userUpdates: Record<string, any> = {};
-    if (updates.name) userUpdates.name = updates.name;
-    if (updates.phone) userUpdates.phone = updates.phone;
-    
-    if (Object.keys(userUpdates).length > 0) {
-      await users.update(params.id, userUpdates);
+
+    // Update preferences
+    await users.updatePrefs(id, mergedPrefs);
+
+    // Conditionally update user name or phone
+    if (updates.name && updates.name !== user.name) {
+      await users.updateName(id, updates.name);
     }
 
-    return NextResponse.json({ 
+    if (updates.phone && updates.phone !== user.phone) {
+      await users.updatePhone(id, updates.phone);
+    }
+
+    return NextResponse.json({
       success: true,
-      message: 'Resource updated successfully' 
+      message: "Resource updated successfully",
+      data: {
+        id,
+        name: updates.name ?? user.name,
+        phone: updates.phone ?? user.phone,
+        prefs: mergedPrefs,
+      },
     });
   } catch (error) {
-    console.error(`Error updating resource ${params.id}:`, error);
+    console.error("Error updating resource:", error);
+    const status =
+      error instanceof Error && error.message.includes("not found") ? 404 : 400;
     return NextResponse.json(
-      { error: 'Failed to update resource' },
-      { status: 400 }
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to update resource",
+      },
+      { status }
     );
   }
 }

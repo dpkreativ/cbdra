@@ -9,9 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Award, Edit, Calendar, CheckCircle } from "lucide-react";
+import { Award, Edit, Calendar, CheckCircle, Plus, X } from "lucide-react";
 import { toast } from "sonner";
-import { getUser } from "@/actions/auth"; // Appwrite wrapper
+import { getUser } from "@/actions/auth";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 /* ----------------------------
    Types
@@ -79,6 +86,8 @@ export default function VolunteerProfilePage() {
   const [stats, setStats] = useState<VolunteerStats | null>(null);
   const [tempSkills, setTempSkills] = useState<string[]>([]);
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [skillDialogOpen, setSkillDialogOpen] = useState<boolean>(false);
+  const [newSkill, setNewSkill] = useState<string>("");
 
   const completionRate =
     stats && stats.totalAssignments > 0
@@ -86,7 +95,7 @@ export default function VolunteerProfilePage() {
       : 0;
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfile = async (): Promise<void> => {
       try {
         const user: Models.User<Models.Preferences> | null = await getUser();
 
@@ -158,30 +167,32 @@ export default function VolunteerProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = (): void => {
     if (!profile) return;
     console.log("Saving profile:", profile);
     toast.success("Profile updated successfully!");
     setEditMode(false);
   };
 
-  const handleAddSkill = (skill: string) => {
-    if (!tempSkills.includes(skill)) {
-      setTempSkills([...tempSkills, skill]);
+  const handleAddSkill = (): void => {
+    if (newSkill.trim() && !tempSkills.includes(newSkill.trim())) {
+      setTempSkills((prev) => [...prev, newSkill.trim()]);
+      setNewSkill("");
     }
   };
 
-  const handleRemoveSkill = (skill: string) => {
-    setTempSkills(tempSkills.filter((s) => s !== skill));
+  const handleRemoveSkill = (skill: string): void => {
+    setTempSkills((prev) => prev.filter((s) => s !== skill));
   };
 
-  const handleSaveSkills = () => {
+  const handleSaveSkills = (): void => {
     if (!profile) return;
     setProfile({ ...profile, skills: tempSkills });
     toast.success("Skills updated successfully!");
+    setSkillDialogOpen(false);
   };
 
-  const toggleAvailability = () => {
+  const toggleAvailability = (): void => {
     if (!profile) return;
     const newAvailability = !profile.availability;
     setProfile({ ...profile, availability: newAvailability });
@@ -293,7 +304,6 @@ export default function VolunteerProfilePage() {
 
         {/* Personal Info Tab */}
         <TabsContent value="info" className="space-y-4">
-          {/* Basic Information */}
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
@@ -364,9 +374,7 @@ export default function VolunteerProfilePage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setTempSkills(profile.skills);
-                }}
+                onClick={() => setSkillDialogOpen(true)}
               >
                 <Edit className="w-4 h-4" />
                 Edit Skills
@@ -458,7 +466,7 @@ export default function VolunteerProfilePage() {
                       </span>
                     </div>
                     <p className="mt-2 text-muted-foreground">
-                      "{review.feedback}"
+                      &ldquo;{review.feedback}&rdquo;
                     </p>
                   </div>
                 ))}
@@ -467,6 +475,53 @@ export default function VolunteerProfilePage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Skills Dialog */}
+      <Dialog open={skillDialogOpen} onOpenChange={setSkillDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Skills</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Add new skill..."
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+              />
+              <Button size="icon" onClick={handleAddSkill}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {tempSkills.map((skill) => (
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="flex items-center gap-1 text-sm"
+                >
+                  {skill}
+                  <button
+                    onClick={() => handleRemoveSkill(skill)}
+                    className="text-xs text-muted-foreground"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSkillDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSkills}>Save Skills</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

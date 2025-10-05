@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -20,623 +28,524 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  MapPin,
-  Clock,
-  AlertCircle,
   Search,
+  CheckCircle,
+  XCircle,
+  Eye,
+  UserPlus,
+  Mail,
+  Phone,
+  MapPin,
+  Shield,
+  Building,
   Heart,
-  Filter,
-  Navigation,
-  Users,
 } from "lucide-react";
 
-const MOCK_INCIDENTS = [
+/* -------------------------------
+   Types
+-------------------------------- */
+type ResourceType = "volunteer" | "ngo" | "gov";
+
+interface Resource {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  type: ResourceType;
+  available: boolean;
+  skills: string[];
+  location: string;
+  joinedDate: string;
+  assignedIncidents: number;
+  resolvedIncidents: number;
+  rating: number;
+}
+
+interface TypeConfig {
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+/* -------------------------------
+   Mock Data (US-based)
+-------------------------------- */
+const MOCK_RESOURCES: Resource[] = [
   {
     id: "1",
-    incidentType: "Flood",
-    category: "water",
-    description:
-      "Flash flooding in Eleme community affecting 50+ families. Need help with evacuation and distribution of relief materials.",
-    location: "Eleme, Rivers State",
-    coordinates: { lat: 4.7849, lng: 7.1129 },
-    urgency: "high",
-    postedAt: "2024-10-04T07:45:00Z",
-    requiredSkills: ["Search & Rescue", "First Aid", "Logistics"],
-    estimatedDuration: "6-8 hours",
-    distance: "12 km away",
-    volunteersNeeded: 5,
-    volunteersAssigned: 2,
-    postedBy: "Emergency Response Team",
-    matchScore: 95, // How well it matches volunteer skills
+    name: "John Doe",
+    email: "john@example.com",
+    phone: "+1 (404) 123-4567",
+    type: "volunteer",
+    available: true,
+    skills: ["First Aid", "Search & Rescue"],
+    location: "Atlanta, Georgia",
+    joinedDate: "2024-01-15",
+    assignedIncidents: 12,
+    resolvedIncidents: 10,
+    rating: 4.8,
   },
   {
     id: "2",
-    incidentType: "Medical Emergency",
-    category: "biological",
-    description:
-      "Community health awareness needed after food poisoning outbreak in local market area.",
-    location: "Diobu, Port Harcourt",
-    coordinates: { lat: 4.797, lng: 7.0235 },
-    urgency: "medium",
-    postedAt: "2024-10-04T09:00:00Z",
-    requiredSkills: ["First Aid", "Community Outreach", "Health Education"],
-    estimatedDuration: "3-4 hours",
-    distance: "8 km away",
-    volunteersNeeded: 3,
-    volunteersAssigned: 1,
-    postedBy: "Community Health Initiative",
-    matchScore: 88,
+    name: "Red Cross Atlanta",
+    email: "contact@redcross.org",
+    phone: "+1 (470) 234-5678",
+    type: "ngo",
+    available: true,
+    skills: ["Shelter", "Medical Aid", "Food Distribution"],
+    location: "Atlanta, Georgia",
+    joinedDate: "2023-06-20",
+    assignedIncidents: 45,
+    resolvedIncidents: 42,
+    rating: 4.9,
   },
   {
     id: "3",
-    incidentType: "Building Collapse",
-    category: "man-made",
-    description:
-      "Partial building collapse at construction site. Search and rescue support needed urgently.",
-    location: "Trans Amadi, Port Harcourt",
-    coordinates: { lat: 4.8156, lng: 7.0498 },
-    urgency: "high",
-    postedAt: "2024-10-04T08:30:00Z",
-    requiredSkills: ["Search & Rescue", "First Aid", "Emergency Response"],
-    estimatedDuration: "8-10 hours",
-    distance: "15 km away",
-    volunteersNeeded: 6,
-    volunteersAssigned: 3,
-    postedBy: "Fire Department",
-    matchScore: 78,
+    name: "Jane Smith",
+    email: "jane@example.com",
+    phone: "+1 (678) 345-6789",
+    type: "volunteer",
+    available: false,
+    skills: ["Counseling", "Community Outreach"],
+    location: "Atlanta, Georgia",
+    joinedDate: "2024-03-10",
+    assignedIncidents: 8,
+    resolvedIncidents: 7,
+    rating: 4.6,
   },
   {
     id: "4",
-    incidentType: "Traffic Accident",
-    category: "man-made",
-    description:
-      "Multiple vehicle collision on major highway. First aid assistance required.",
-    location: "East-West Road, Port Harcourt",
-    coordinates: { lat: 4.8242, lng: 7.0336 },
-    urgency: "medium",
-    postedAt: "2024-10-04T10:15:00Z",
-    requiredSkills: ["First Aid", "Traffic Management"],
-    estimatedDuration: "2-3 hours",
-    distance: "6 km away",
-    volunteersNeeded: 2,
-    volunteersAssigned: 0,
-    postedBy: "Traffic Authority",
-    matchScore: 85,
-  },
-  {
-    id: "5",
-    incidentType: "Community Outreach",
-    category: "other",
-    description:
-      "Relief material distribution for flood victims. Need volunteers for logistics support.",
-    location: "Ogbogoro, Port Harcourt",
-    coordinates: { lat: 4.8893, lng: 6.9547 },
-    urgency: "low",
-    postedAt: "2024-10-04T11:00:00Z",
-    requiredSkills: ["Logistics", "Community Outreach"],
-    estimatedDuration: "4-5 hours",
-    distance: "20 km away",
-    volunteersNeeded: 4,
-    volunteersAssigned: 1,
-    postedBy: "Red Cross NGO",
-    matchScore: 65,
+    name: "Atlanta Fire Department",
+    email: "fire@atlanta.gov",
+    phone: "+1 (404) 555-7890",
+    type: "gov",
+    available: true,
+    skills: ["Fire Response", "Emergency Rescue", "Safety"],
+    location: "Atlanta, Georgia",
+    joinedDate: "2023-01-05",
+    assignedIncidents: 78,
+    resolvedIncidents: 75,
+    rating: 4.95,
   },
 ];
 
-const URGENCY_CONFIG = {
-  high: {
-    label: "Critical",
-    color: "bg-red-100 text-red-700 border-red-200",
-    icon: AlertCircle,
+/* -------------------------------
+   Config for Resource Types
+-------------------------------- */
+const TYPE_CONFIG: Record<ResourceType, TypeConfig> = {
+  volunteer: {
+    label: "Volunteer",
+    icon: <Heart className="w-8 h-8" />,
+    color: "text-blue-600 bg-blue-100",
   },
-  medium: {
-    label: "Moderate",
-    color: "bg-amber-100 text-amber-700 border-amber-200",
-    icon: Clock,
+  ngo: {
+    label: "NGO",
+    icon: <Building className="w-8 h-8" />,
+    color: "text-purple-600 bg-purple-100",
   },
-  low: {
-    label: "Minor",
-    color: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    icon: Clock,
+  gov: {
+    label: "Government",
+    icon: <Shield className="w-8 h-8" />,
+    color: "text-emerald-600 bg-emerald-100",
   },
 };
 
-export default function VolunteerAvailableIncidentsPage() {
-  const [incidents, setIncidents] = useState(MOCK_INCIDENTS);
-  const [selectedIncident, setSelectedIncident] = useState<any>(null);
-  const [viewDetailsDialog, setViewDetailsDialog] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterUrgency, setFilterUrgency] = useState("all");
-  const [filterDistance, setFilterDistance] = useState("all");
-  const [sortBy, setSortBy] = useState("match"); // match, urgency, distance, time
+/* -------------------------------
+   Component
+-------------------------------- */
+export default function ResourcesAdminPage() {
+  const [resources, setResources] = useState<Resource[]>(MOCK_RESOURCES);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  );
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filterType, setFilterType] = useState<ResourceType | "all">("all");
+  const [filterAvailability, setFilterAvailability] = useState<
+    "all" | "available" | "unavailable"
+  >("all");
+  const [viewDetailsDialog, setViewDetailsDialog] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<ResourceType | "all">("all");
 
-  // Filter and sort incidents
-  const filteredIncidents = incidents
-    .filter((incident) => {
-      const matchesSearch =
-        incident.incidentType
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        incident.description
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        incident.location.toLowerCase().includes(searchQuery.toLowerCase());
+  // Event handlers
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    setSearchQuery(e.target.value);
+  };
 
-      const matchesUrgency =
-        filterUrgency === "all" || incident.urgency === filterUrgency;
-
-      const matchesDistance =
-        filterDistance === "all" ||
-        (filterDistance === "near" && parseInt(incident.distance) <= 10) ||
-        (filterDistance === "medium" &&
-          parseInt(incident.distance) > 10 &&
-          parseInt(incident.distance) <= 20) ||
-        (filterDistance === "far" && parseInt(incident.distance) > 20);
-
-      return matchesSearch && matchesUrgency && matchesDistance;
-    })
-    .sort((a, b) => {
-      if (sortBy === "match") return b.matchScore - a.matchScore;
-      if (sortBy === "urgency") {
-        const urgencyOrder = { high: 3, medium: 2, low: 1 };
-        return urgencyOrder[b.urgency] - urgencyOrder[a.urgency];
-      }
-      if (sortBy === "distance")
-        return parseInt(a.distance) - parseInt(b.distance);
-      if (sortBy === "time")
-        return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
-      return 0;
-    });
-
-  const handleViewDetails = (incident: any) => {
-    setSelectedIncident(incident);
+  const handleViewDetails = (resource: Resource): void => {
+    setSelectedResource(resource);
     setViewDetailsDialog(true);
   };
 
-  const handleAcceptIncident = (incidentId: string) => {
-    // TODO: API call to accept incident
-    console.log("Accepting incident:", incidentId);
-    setViewDetailsDialog(false);
+  const toggleAvailability = (id: string): void => {
+    setResources((prevResources) =>
+      prevResources.map((r) =>
+        r.id === id ? { ...r, available: !r.available } : r
+      )
+    );
   };
 
-  const handleGetDirections = (coords: { lat: number; lng: number }) => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`;
-    window.open(url, "_blank");
-  };
+  // Filtering logic
+  const filteredResources = resources.filter((resource) => {
+    const matchesSearch =
+      resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.skills.some((skill) =>
+        skill.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const matchesType = filterType === "all" || resource.type === filterType;
+    const matchesAvailability =
+      filterAvailability === "all" ||
+      (filterAvailability === "available" && resource.available) ||
+      (filterAvailability === "unavailable" && !resource.available);
+    const matchesTab = activeTab === "all" || resource.type === activeTab;
 
-    if (diffHours < 1) {
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      return `${diffMins} mins ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} hours ago`;
-    } else {
-      const diffDays = Math.floor(diffHours / 24);
-      return `${diffDays} days ago`;
-    }
+    return matchesSearch && matchesType && matchesAvailability && matchesTab;
+  });
+
+  // Stats
+  const stats = {
+    total: resources.length,
+    volunteers: resources.filter((r) => r.type === "volunteer").length,
+    ngos: resources.filter((r) => r.type === "ngo").length,
+    gov: resources.filter((r) => r.type === "gov").length,
+    available: resources.filter((r) => r.available).length,
   };
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Available Incidents</h1>
-        <p className="text-muted-foreground mt-1">
-          Find incidents matching your skills and help your community
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Resource Management</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage volunteers, NGOs, and government agencies
+          </p>
+        </div>
+        <Button>
+          <UserPlus className="w-4 h-4" />
+          Add Resource
+        </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">
-              Total Available
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {incidents.length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">
-              Critical
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {incidents.filter((i) => i.urgency === "high").length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">
-              Best Matches
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">
-              {incidents.filter((i) => i.matchScore >= 80).length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">
-              Volunteers Needed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {incidents.reduce(
-                (sum, i) => sum + (i.volunteersNeeded - i.volunteersAssigned),
-                0
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {[
+          { label: "Total Resources", value: stats.total },
+          {
+            label: "Volunteers",
+            value: stats.volunteers,
+            color: "text-blue-600",
+          },
+          { label: "NGOs", value: stats.ngos, color: "text-purple-600" },
+          { label: "Government", value: stats.gov, color: "text-emerald-600" },
+          {
+            label: "Available Now",
+            value: stats.available,
+            color: "text-emerald-600",
+          },
+        ].map((card) => (
+          <Card key={card.label}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground">
+                {card.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${card.color ?? ""}`}>
+                {card.value}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Filters and Search */}
+      {/* Filters */}
       <Card>
-        <CardContent className="pt-6 space-y-4">
+        <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search incidents..."
+                placeholder="Search by name, email, or skills..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="pl-10"
               />
             </div>
-            <Select value={filterUrgency} onValueChange={setFilterUrgency}>
+            <Select
+              value={filterType}
+              onValueChange={(val) =>
+                setFilterType(val as ResourceType | "all")
+              }
+            >
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Urgency" />
+                <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Urgency</SelectItem>
-                <SelectItem value="high">Critical</SelectItem>
-                <SelectItem value="medium">Moderate</SelectItem>
-                <SelectItem value="low">Minor</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="volunteer">Volunteers</SelectItem>
+                <SelectItem value="ngo">NGOs</SelectItem>
+                <SelectItem value="gov">Government</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={filterDistance} onValueChange={setFilterDistance}>
+            <Select
+              value={filterAvailability}
+              onValueChange={(val) =>
+                setFilterAvailability(
+                  val as "all" | "available" | "unavailable"
+                )
+              }
+            >
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Distance" />
+                <SelectValue placeholder="Availability" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Distances</SelectItem>
-                <SelectItem value="near">Within 10 km</SelectItem>
-                <SelectItem value="medium">10-20 km</SelectItem>
-                <SelectItem value="far">20+ km</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="unavailable">Unavailable</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Sort by:</span>
-            <div className="flex gap-2">
-              <Button
-                variant={sortBy === "match" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("match")}
-              >
-                Best Match
-              </Button>
-              <Button
-                variant={sortBy === "urgency" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("urgency")}
-              >
-                Urgency
-              </Button>
-              <Button
-                variant={sortBy === "distance" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("distance")}
-              >
-                Distance
-              </Button>
-              <Button
-                variant={sortBy === "time" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("time")}
-              >
-                Latest
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Incidents List */}
-      {filteredIncidents.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">
-              No incidents match your filters. Try adjusting your search
-              criteria.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {filteredIncidents.map((incident) => {
-            const UrgencyIcon = URGENCY_CONFIG[incident.urgency].icon;
-            const spotsRemaining =
-              incident.volunteersNeeded - incident.volunteersAssigned;
-            return (
-              <Card
-                key={incident.id}
-                className="border-2 hover:border-primary transition-colors"
-              >
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-lg">
-                            {incident.incidentType}
-                          </h3>
-                          {incident.matchScore >= 80 && (
-                            <Badge className="bg-emerald-100 text-emerald-700">
-                              {incident.matchScore}% Match
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {incident.description}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={URGENCY_CONFIG[incident.urgency].color}
-                      >
-                        <UrgencyIcon className="w-3 h-3 mr-1" />
-                        {URGENCY_CONFIG[incident.urgency].label}
-                      </Badge>
-                    </div>
+      {/* Tabs and Table */}
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => setActiveTab(val as ResourceType | "all")}
+      >
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
+          <TabsTrigger value="volunteer">
+            Volunteers ({stats.volunteers})
+          </TabsTrigger>
+          <TabsTrigger value="ngo">NGOs ({stats.ngos})</TabsTrigger>
+          <TabsTrigger value="gov">Government ({stats.gov})</TabsTrigger>
+        </TabsList>
 
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">{incident.distance}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {incident.location}
+        <TabsContent value={activeTab} className="mt-6">
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Skills</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Performance</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredResources.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      No resources found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredResources.map((resource) => {
+                    return (
+                      <TableRow key={resource.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`p-2 rounded-lg ${
+                                TYPE_CONFIG[resource.type].color
+                              }`}
+                            >
+                              {TYPE_CONFIG[resource.type].icon}
+                            </div>
+                            <div>
+                              <div className="font-medium">{resource.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Joined{" "}
+                                {new Date(
+                                  resource.joinedDate
+                                ).toLocaleDateString()}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">
-                            {incident.estimatedDuration}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Est. duration
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">
-                            {spotsRemaining} spot
-                            {spotsRemaining !== 1 ? "s" : ""}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            remaining
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-medium">
-                          {formatTimeAgo(incident.postedAt)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Posted
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-medium">{incident.postedBy}</div>
-                        <div className="text-xs text-muted-foreground">
-                          Posted by
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Skills Required */}
-                    <div>
-                      <span className="text-sm font-medium">
-                        Required Skills:{" "}
-                      </span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {incident.requiredSkills.map((skill, idx) => (
+                        </TableCell>
+                        <TableCell>
                           <Badge
-                            key={idx}
-                            variant="secondary"
-                            className="text-xs"
+                            variant="outline"
+                            className={TYPE_CONFIG[resource.type].color}
                           >
-                            {skill}
+                            {TYPE_CONFIG[resource.type].label}
                           </Badge>
-                        ))}
-                      </div>
-                    </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex items-center gap-1">
+                              <Mail className="w-3 h-3 text-muted-foreground" />
+                              <span>{resource.email}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-muted-foreground" />
+                              <span>{resource.phone}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {resource.skills.map((skill) => (
+                              <Badge
+                                key={skill}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm">
+                            <MapPin className="w-3 h-3 text-muted-foreground" />
+                            {resource.location}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleAvailability(resource.id)}
+                            className="gap-2"
+                          >
+                            {resource.available ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                <span className="text-emerald-600">
+                                  Available
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <XCircle className="w-4 h-4 text-gray-400" />
+                                <span className="text-gray-600">
+                                  Unavailable
+                                </span>
+                              </>
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>
+                              Rating:{" "}
+                              <span className="font-medium">
+                                {resource.rating.toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {resource.resolvedIncidents}/
+                              {resource.assignedIncidents} resolved
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewDetails(resource)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
-                    {/* Progress Bar */}
-                    <div>
-                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>
-                          {incident.volunteersAssigned} of{" "}
-                          {incident.volunteersNeeded} volunteers assigned
-                        </span>
-                        <span>
-                          {Math.round(
-                            (incident.volunteersAssigned /
-                              incident.volunteersNeeded) *
-                              100
-                          )}
-                          %
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all"
-                          style={{
-                            width: `${
-                              (incident.volunteersAssigned /
-                                incident.volunteersNeeded) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex flex-wrap gap-2 pt-2 border-t">
-                      <Button onClick={() => handleAcceptIncident(incident.id)}>
-                        <Heart className="w-4 h-4 mr-2" />
-                        Accept Assignment
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleViewDetails(incident)}
-                      >
-                        View Details
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          handleGetDirections(incident.coordinates)
-                        }
-                      >
-                        <Navigation className="w-4 h-4 mr-2" />
-                        Get Directions
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* View Details Dialog */}
+      {/* Details Dialog */}
       <Dialog open={viewDetailsDialog} onOpenChange={setViewDetailsDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Incident Details</DialogTitle>
+            <DialogTitle>Resource Details</DialogTitle>
             <DialogDescription>
-              Complete information about this incident
+              Complete information about this resource
             </DialogDescription>
           </DialogHeader>
-          {selectedIncident && (
-            <div className="space-y-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold">
-                    {selectedIncident.incidentType}
-                  </h3>
-                  <p className="text-muted-foreground mt-1">
-                    {selectedIncident.description}
-                  </p>
-                </div>
-                <Badge
-                  variant="outline"
-                  className={URGENCY_CONFIG[selectedIncident.urgency].color}
+          {selectedResource && (
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div
+                  className={`p-4 rounded-lg ${
+                    TYPE_CONFIG[selectedResource.type].color
+                  }`}
                 >
-                  {URGENCY_CONFIG[selectedIncident.urgency].label}
-                </Badge>
+                  {TYPE_CONFIG[selectedResource.type].icon}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold">
+                    {selectedResource.name}
+                  </h3>
+                  <Badge variant="outline" className="mt-1">
+                    {TYPE_CONFIG[selectedResource.type].label}
+                  </Badge>
+                </div>
+                <Button
+                  variant={selectedResource.available ? "outline" : "default"}
+                  onClick={() => toggleAvailability(selectedResource.id)}
+                >
+                  {selectedResource.available ? (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Available
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4" />
+                      Unavailable
+                    </>
+                  )}
+                </Button>
               </div>
 
+              {/* Details */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-medium">{selectedResource.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="font-medium">{selectedResource.phone}</p>
+                </div>
+                <div>
                   <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-medium">{selectedIncident.location}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedIncident.distance}
-                  </p>
+                  <p className="font-medium">{selectedResource.location}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
-                    Estimated Duration
-                  </p>
+                  <p className="text-sm text-muted-foreground">Joined</p>
                   <p className="font-medium">
-                    {selectedIncident.estimatedDuration}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Posted By</p>
-                  <p className="font-medium">{selectedIncident.postedBy}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Posted</p>
-                  <p className="font-medium">
-                    {formatTimeAgo(selectedIncident.postedAt)}
+                    {new Date(selectedResource.joinedDate).toLocaleDateString()}
                   </p>
                 </div>
               </div>
 
+              {/* Skills */}
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Required Skills
+                  Skills & Services
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {selectedIncident.requiredSkills.map(
-                    (skill: string, idx: number) => (
-                      <Badge key={idx} variant="secondary">
-                        {skill}
-                      </Badge>
-                    )
-                  )}
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <p className="text-sm font-medium mb-2">Volunteer Status</p>
-                <div className="flex items-center gap-4">
-                  <div>
-                    <p className="text-2xl font-bold text-primary">
-                      {selectedIncident.volunteersAssigned}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Assigned</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-emerald-600">
-                      {selectedIncident.volunteersNeeded -
-                        selectedIncident.volunteersAssigned}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Still Needed
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-amber-600">
-                      {selectedIncident.matchScore}%
-                    </p>
-                    <p className="text-xs text-muted-foreground">Match Score</p>
-                  </div>
+                  {selectedResource.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             </div>
@@ -648,24 +557,7 @@ export default function VolunteerAvailableIncidentsPage() {
             >
               Close
             </Button>
-            <Button
-              variant="outline"
-              onClick={() =>
-                selectedIncident &&
-                handleGetDirections(selectedIncident.coordinates)
-              }
-            >
-              <Navigation className="w-4 h-4 mr-2" />
-              Get Directions
-            </Button>
-            <Button
-              onClick={() =>
-                selectedIncident && handleAcceptIncident(selectedIncident.id)
-              }
-            >
-              <Heart className="w-4 h-4 mr-2" />
-              Accept Assignment
-            </Button>
+            <Button>Assign to Incident</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

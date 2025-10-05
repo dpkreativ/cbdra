@@ -26,11 +26,11 @@ export default function NotFound() {
             </div>
 
             <h1 className="text-3xl font-semibold tracking-tight">
-              We couldn't find that page
+              We couldn&apos;t find that page
             </h1>
             <p className="text-muted-foreground">
-              Looks like the page you're searching for isn't here. Don't worry,
-              you're still safe with us.
+              Looks like the page you&apos;re searching for isn&apos;t here.
+              Don&apos;t worry, you&apos;re still safe with us.
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row">

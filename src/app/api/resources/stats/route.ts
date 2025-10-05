@@ -1,95 +1,134 @@
 import { createAdminClient } from "@/lib/appwrite";
 import { NextResponse } from "next/server";
 import { Query } from "node-appwrite";
-import { resourceTypes } from "@/schemas/resources";
+import { resourceTypes, resourcePrefsSchema } from "@/schemas/resources";
+import { DB_ID, COLLECTIONS } from "@/config/appwrite";
 
-// GET - Get aggregated stats for resources
+type ResourceDoc = {
+  $id: string;
+  name?: string;
+  prefs?: unknown;
+  // Add other fields you expect here if needed
+};
+
 export async function GET() {
   try {
-    const { users } = await createAdminClient();
+    const { databases } = await createAdminClient();
 
-    // Get all resources (volunteers, NGOs, gov)
-    const { documents: resources } = await users.list([
-      Query.limit(1000), // Adjust based on expected volume
-      Query.offset(0),
-      Query.select(['$id', 'prefs'])
-    ]);
+    // Fetch resource documents from databases (safe, returns { documents })
+    const response = await databases.listDocuments(
+      DB_ID,
+      COLLECTIONS.RESOURCES,
+      [
+        Query.limit(1000), // Adjust to a sensible max for your app
+        Query.offset(0),
+        Query.select(["$id", "name", "prefs"]),
+      ]
+    );
 
-    // Initialize stats
+    const documents =
+      (response && (response as { documents?: ResourceDoc[] }).documents) ?? [];
+
+    // Stats shape
     const stats = {
       total: 0,
       byType: {} as Record<string, number>,
       available: 0,
       averageRating: 0,
-      topPerformers: [] as Array<{id: string, name: string, rating: number, resolved: number}>,
-      skills: new Map<string, number>()
+      topPerformers: [] as Array<{
+        id: string;
+        name: string;
+        rating: number;
+        resolved: number;
+      }>,
+      skills: new Map<string, number>(),
     };
 
-    // Initialize type counts
-    resourceTypes.options.forEach(type => {
-      stats.byType[type] = 0;
+    // initialize counts
+    resourceTypes.options.forEach((t) => {
+      stats.byType[t] = 0;
     });
 
-    // Process resources
     let totalRating = 0;
-    const performers: Array<{id: string, name: string, rating: number, resolved: number}> = [];
+    const performers: Array<{
+      id: string;
+      name: string;
+      rating: number;
+      resolved: number;
+    }> = [];
 
-    for (const user of resources) {
-      const prefs = user.prefs || {};
-      const role = prefs.role;
-      
-      // Only process resource types
-      if (!resourceTypes.safeParse(role).success) continue;
+    for (const doc of documents) {
+      const prefsParsed = (() => {
+        try {
+          return resourcePrefsSchema.parse(doc.prefs ?? {});
+        } catch {
+          // if validation fails, fallback to an empty safe shape
+          return {
+            role: undefined,
+            availability: false,
+            rating: 0,
+            resolvedIncidents: 0,
+            skills: [] as string[],
+          } as const;
+        }
+      })();
+
+      const role = prefsParsed.role as unknown as string | undefined;
+
+      // only count valid resource types
+      if (!role || !resourceTypes.safeParse(role).success) continue;
 
       stats.total++;
       stats.byType[role] = (stats.byType[role] || 0) + 1;
-      
-      if (prefs.availability) stats.available++;
-      
-      const rating = Number(prefs.rating) || 0;
+
+      if (prefsParsed.availability) stats.available++;
+
+      const rating = Number(prefsParsed.rating) || 0;
       totalRating += rating;
 
-      // Track skills
-      if (Array.isArray(prefs.skills)) {
-        prefs.skills.forEach(skill => {
+      if (Array.isArray(prefsParsed.skills)) {
+        for (const skill of prefsParsed.skills) {
           stats.skills.set(skill, (stats.skills.get(skill) || 0) + 1);
-        });
+        }
       }
 
-      // Track top performers (those with at least 1 resolved incident)
-      const resolved = Number(prefs.resolvedIncidents) || 0;
+      const resolved = Number(prefsParsed.resolvedIncidents) || 0;
       if (resolved > 0) {
         performers.push({
-          id: user.$id,
-          name: user.name || 'Unknown',
+          id: doc.$id,
+          name: doc.name ?? "Unknown",
           rating,
-          resolved
+          resolved,
         });
       }
     }
 
-    // Calculate averages and sort top performers
-    stats.averageRating = stats.total > 0 ? parseFloat((totalRating / stats.total).toFixed(2)) : 0;
-    
-    // Get top 5 performers by rating (minimum 3 resolved incidents)
+    stats.averageRating =
+      stats.total > 0 ? parseFloat((totalRating / stats.total).toFixed(2)) : 0;
+
+    // Top performers: min resolved threshold (adjust as needed)
     stats.topPerformers = performers
-      .filter(p => p.resolved >= 3)
+      .filter((p) => p.resolved >= 3)
       .sort((a, b) => b.rating - a.rating || b.resolved - a.resolved)
       .slice(0, 5);
 
-    // Convert skills map to sorted array
-    const skills = Array.from(stats.skills.entries())
+    const topSkills = Array.from(stats.skills.entries())
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10); // Top 10 most common skills
+      .slice(0, 10)
+      .map(([name, count]) => ({ name, count }));
 
     return NextResponse.json({
-      ...stats,
-      topSkills: skills.map(([name, count]) => ({ name, count }))
+      total: stats.total,
+      byType: stats.byType,
+      available: stats.available,
+      averageRating: stats.averageRating,
+      topPerformers: stats.topPerformers,
+      topSkills,
     });
   } catch (error) {
-    console.error('Error fetching resource stats:', error);
+    console.error("Error fetching resource stats:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch resource statistics' },
+      { error: "Failed to fetch resource statistics" },
       { status: 500 }
     );
   }
