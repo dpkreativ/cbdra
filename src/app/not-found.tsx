@@ -1,13 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Home } from "lucide-react";
+import { Search, Home, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import "@/app/globals.css";
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <main className="flex h-screen w-full flex-col items-center justify-center bg-background px-4">
       <motion.div
@@ -23,22 +26,27 @@ export default function NotFound() {
             </div>
 
             <h1 className="text-3xl font-semibold tracking-tight">
-              We couldn't find that page
+              We couldn&apos;t find that page
             </h1>
             <p className="text-muted-foreground">
-              Looks like the page you're searching for isn't here. Don't worry,
-              you're still safe with us.
+              Looks like the page you&apos;re searching for isn&apos;t here.
+              Don&apos;t worry, you&apos;re still safe with us.
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button asChild variant="default" className="px-6">
-                <Link href="/">
+                <Link href="/dashboard">
                   <Home className="mr-2 h-4 w-4" />
                   Go to Dashboard
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="px-6">
-                <Link href="/report">Report an Incident</Link>
+              <Button
+                variant="outline"
+                className="px-6"
+                onClick={() => router.back()}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Go Back
               </Button>
             </div>
           </CardContent>

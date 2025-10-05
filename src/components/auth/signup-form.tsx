@@ -226,7 +226,6 @@ export function SignupForm() {
                     <SelectItem value="volunteer">Volunteer</SelectItem>
                     <SelectItem value="ngo">NGO</SelectItem>
                     <SelectItem value="gov">Govt. Agency</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
